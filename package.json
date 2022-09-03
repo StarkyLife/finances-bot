@@ -1,0 +1,30 @@
+{
+  "name": "finances-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "@typescript-eslint/parser": "^5.36.1",
+    "eslint": "^8.23.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-simple-import-sort": "^8.0.0",
+    "jest": "^29.0.2",
+    "nodemon": "^2.0.19",
+    "prettier": "^2.3.2",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^28.0.8",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.2"
+  },
+  "scripts": {
+    "start:dev": "nodemon",
+    "build": "rimraf dist && tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings 0",
+    "lint:fix": "yarn lint --fix",
+    "test": "jest"
+  }
+}
