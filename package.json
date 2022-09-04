@@ -23,8 +23,13 @@
     "start:dev": "nodemon",
     "build": "rimraf dist && tsc",
     "start": "node dist/index.js",
-    "lint": "eslint \"src/**/*.ts\" --max-warnings 0",
+    "lint": "eslint \"{src,e2e}/**/*.ts\" --max-warnings 0",
     "lint:fix": "yarn lint --fix",
-    "test": "jest"
+    "test": "jest src",
+    "test:e2e": "jest e2e"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.2",
+    "telegraf": "^4.9.1"
   }
 }
