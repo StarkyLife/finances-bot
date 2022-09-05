@@ -1,5 +1,6 @@
 export const saveSequence = async (
   getSequenceData: () => Record<string, string> | undefined,
+  clearSequenceData: () => void,
   getSheetId: () => string | undefined,
   saveInGoogleSheet: (sheetId: string, data: Record<string, string>) => Promise<void>
 ) => {
@@ -10,4 +11,6 @@ export const saveSequence = async (
   if (!sheetId) throw new Error('No sheet id!');
 
   await saveInGoogleSheet(sheetId, data);
+
+  clearSequenceData();
 };
