@@ -2,8 +2,12 @@ import { StepWithLabel } from '../core/data/step';
 import { filterOutNulls } from '../utils/filters';
 
 export const presentSequenceData =
-  (stepsMap: Map<string, StepWithLabel>) => (getSequenceData: () => Record<string, string>) => {
+  (stepsMap: Map<string, StepWithLabel>) => (
+    getSequenceData: () => Record<string, string> | undefined
+  ) => {
     const data = getSequenceData();
+
+    if (!data) throw new Error('No data to present!');
 
     return Object.keys(data)
       .map((key) => {
