@@ -1,7 +1,8 @@
+import { StepWithLabel } from '../core/data/step';
 import { filterOutNulls } from '../utils/filters';
 
 export const presentSequenceData =
-  (stepsMap: Map<string, { label: string }>) => (getSequenceData: () => Record<string, string>) => {
+  (stepsMap: Map<string, StepWithLabel>) => (getSequenceData: () => Record<string, string>) => {
     const data = getSequenceData();
 
     return Object.keys(data)

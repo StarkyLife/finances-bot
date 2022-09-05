@@ -1,7 +1,10 @@
+import { StepWithLabel } from '../core/data/step';
 import { presentSequenceData } from './present-sequence-data';
 
+const createStepsMap = (data: Array<[string, StepWithLabel]>) => new Map(data);
+
 it('should present sequence data', () => {
-  const stepsMap = new Map<string, { label: string }>([
+  const stepsMap = createStepsMap([
     ['type_id', { label: 'Type' }],
     ['price_id', { label: 'Price' }],
   ]);
@@ -9,7 +12,7 @@ it('should present sequence data', () => {
   const getSequenceData = jest.fn().mockReturnValue({
     type_id: 'Income',
     price_id: '100',
-    comment_id: 'comment'
+    comment_id: 'comment',
   });
 
   const sequencePresentation = presentSequenceData(stepsMap)(getSequenceData);

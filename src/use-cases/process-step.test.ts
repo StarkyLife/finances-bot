@@ -1,37 +1,42 @@
-import { StepsMap } from '../core/data/steps-map';
+import { StepWithLabel, StepWithNext } from '../core/data/step';
 import { processStep } from './process-step';
+
+const createStepsMap = (data: Array<[string, StepWithNext & StepWithLabel]>) => new Map(data);
 
 it('should save step data', () => {
   const stepId = 'step id';
-  const stepsMap: StepsMap = new Map([[stepId, undefined]]);
-  const data = 'step data';
+  const stepsMap = createStepsMap([[stepId, { label: 'step label', next: undefined }]]);
+  const stepValue = 'step data';
   const saveStep = jest.fn();
 
-  processStep(stepsMap)(saveStep, stepId, data);
+  processStep(stepsMap)(saveStep, stepId, stepValue);
 
-  expect(saveStep).toHaveBeenCalledWith(stepId, data);
+  expect(saveStep).toHaveBeenCalledWith(stepId, stepValue);
 });
 
 it('should inform about next step', () => {
   const firstStepId = 'first step id';
   const secondStepId = 'second step id';
-  const stepsMap: StepsMap = new Map([
-    [firstStepId, secondStepId],
-    [secondStepId, undefined],
+  const stepsMap = createStepsMap([
+    [firstStepId, { label: 'first label', next: secondStepId }],
+    [secondStepId, { label: 'second label', next: undefined }],
   ]);
   const saveStep = jest.fn();
 
-  const nextStepId = processStep(stepsMap)(saveStep, firstStepId, 'step data');
+  const nextStepInfo = processStep(stepsMap)(saveStep, firstStepId, 'step data');
 
-  expect(nextStepId).toEqual(secondStepId);
+  expect(nextStepInfo).toEqual({
+    id: secondStepId,
+    label: 'second label',
+  });
 });
 
 it('should inform about end of sequence', () => {
   const stepId = 'step id';
-  const stepsMap: StepsMap = new Map([[stepId, undefined]]);
+  const stepsMap = createStepsMap([[stepId, { label: 'step label', next: undefined }]]);
   const saveStep = jest.fn();
 
-  const nextStepId = processStep(stepsMap)(saveStep, stepId, 'step data');
+  const nextStepInfo = processStep(stepsMap)(saveStep, stepId, 'step data');
 
-  expect(nextStepId).toBeUndefined();
+  expect(nextStepInfo).toBeUndefined();
 });
