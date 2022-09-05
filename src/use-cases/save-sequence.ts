@@ -1,11 +1,13 @@
+import { StoredStep } from '../core/data/step';
+
 export const saveSequence = async (
-  getSequenceData: () => Record<string, string> | undefined,
+  getSequenceData: () => StoredStep[],
   clearSequenceData: () => void,
   getSheetId: () => string | undefined,
-  saveInGoogleSheet: (sheetId: string, data: Record<string, string>) => Promise<void>
+  saveInGoogleSheet: (sheetId: string, data: StoredStep[]) => Promise<void>,
 ) => {
   const data = getSequenceData();
-  if (!data) throw new Error('No data to save!');
+  if (!data.length) throw new Error('No data to save!');
 
   const sheetId = getSheetId();
   if (!sheetId) throw new Error('No sheet id!');

@@ -1,25 +1,19 @@
-import { StepWithLabel } from '../core/data/step';
+import { StepWithLabel, StoredStep } from '../core/data/step';
 import { filterOutNulls } from '../utils/filters';
 
 export const presentSequenceData =
-  (stepsMap: Map<string, StepWithLabel>) => (
-    getSequenceData: () => Record<string, string> | undefined
-  ) => {
+  (stepsMap: Map<string, StepWithLabel>) => (getSequenceData: () => StoredStep[]) => {
     const data = getSequenceData();
 
-    if (!data) throw new Error('No data to present!');
+    if (!data.length) throw new Error('No data to present!');
 
-    return Object.keys(data)
-      .map((key) => {
-        const step = stepsMap.get(key);
+    return data
+      .map(({ id, value }) => {
+        const step = stepsMap.get(id);
 
         if (!step) return null;
 
-        return {
-          id: key,
-          label: step.label,
-          value: data[key],
-        };
+        return { id, label: step.label, value };
       })
       .filter(filterOutNulls);
   };

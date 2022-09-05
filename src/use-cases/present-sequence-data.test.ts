@@ -9,11 +9,11 @@ it('should present sequence data', () => {
     ['price_id', { label: 'Price' }],
   ]);
 
-  const getSequenceData = jest.fn().mockReturnValue({
-    type_id: 'Income',
-    price_id: '100',
-    comment_id: 'comment',
-  });
+  const getSequenceData = jest.fn().mockReturnValue([
+    { id: 'type_id', value: 'Income' },
+    { id: 'price_id', value: '100' },
+    { id: 'comment_id', value: 'comment' },
+  ]);
 
   const sequencePresentation = presentSequenceData(stepsMap)(getSequenceData);
 
@@ -26,7 +26,7 @@ it('should present sequence data', () => {
 it('should throw if sequence data is not exist', () => {
   const stepsMap = createStepsMap([]);
 
-  const getSequenceData = jest.fn().mockReturnValue(undefined);
+  const getSequenceData = jest.fn().mockReturnValue([]);
 
   expect(() => presentSequenceData(stepsMap)(getSequenceData)).toThrow();
 });
