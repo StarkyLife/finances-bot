@@ -1,18 +1,22 @@
+import { SheetInfo } from '../core/data/sheet';
 import { StoredStep } from '../core/data/step';
 
-export const saveSequence = async (
-  getSequenceData: () => StoredStep[],
-  clearSequenceData: () => void,
-  getSheetId: () => string | undefined,
-  saveInGoogleSheet: (sheetId: string, data: StoredStep[]) => Promise<void>,
-) => {
-  const data = getSequenceData();
+export const saveSequence = async (deps: {
+  getSequenceData: () => StoredStep[];
+  clearSequenceData: () => void;
+  getSheetInfo: () => SheetInfo | undefined;
+  saveInGoogleSheet: (
+    sheetInfo: SheetInfo,
+    data: Array<Array<string | undefined>>,
+  ) => Promise<void>;
+}) => {
+  const data = deps.getSequenceData();
   if (!data.length) throw new Error('No data to save!');
 
-  const sheetId = getSheetId();
-  if (!sheetId) throw new Error('No sheet id!');
+  const sheetInfo = deps.getSheetInfo();
+  if (!sheetInfo) throw new Error('No sheet id!');
 
-  await saveInGoogleSheet(sheetId, data);
+  await deps.saveInGoogleSheet(sheetInfo, [data.map((i) => i.value)]);
 
-  clearSequenceData();
+  deps.clearSequenceData();
 };
