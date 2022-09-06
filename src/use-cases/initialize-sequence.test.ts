@@ -1,8 +1,9 @@
+import { Sequence } from '../core/data/sequence';
 import { StepWithLabel } from '../core/data/step';
 import { initializeSequence } from './initialize-sequence';
 
 const createStepsMap = (data: Array<[string, StepWithLabel]>) => new Map(data);
-const createSequences = (data: Array<{ id: string, firstStepId: string }>) => data;
+const createSequences = (data: Array<Sequence>) => data;
 
 it('should throw if sequence is not found', () => {
   const sequences = createSequences([]);
@@ -11,7 +12,7 @@ it('should throw if sequence is not found', () => {
   expect(() => initializeSequence(sequences, stepsMap)('income-sequence')).toThrow();
 });
 
-it('should throw if sequence\'s first step is not found', () => {
+it("should throw if sequence's first step is not found", () => {
   const sequences = createSequences([{ id: 'income-sequence', firstStepId: 'random' }]);
   const stepsMap = createStepsMap([]);
 

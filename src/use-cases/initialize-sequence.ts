@@ -1,8 +1,8 @@
+import { Sequence } from '../core/data/sequence';
 import { StepWithLabel } from '../core/data/step';
 
 export const initializeSequence =
-  (sequences: Array<{ id: string; firstStepId: string }>, stepsMap: Map<string, StepWithLabel>) =>
-  (sequenceId: string) => {
+  (sequences: Sequence[], stepsMap: Map<string, StepWithLabel>) => (sequenceId: string) => {
     const sequence = sequences.find(({ id }) => id === sequenceId);
 
     if (!sequence) throw new Error(`${sequenceId} sequence is not found!`);
