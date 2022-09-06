@@ -1,33 +1,43 @@
-import { Sequence } from '../core/data/sequence';
-import { StepWithLabel } from '../core/data/step';
-import { initializeSequence } from './initialize-sequence';
+import { SequenceWithFirstStepId, SequenceWithName } from '../core/data/sequence';
+import { StepWithLabel, StepWithStaticChoices } from '../core/data/step';
+import { initializeSequenceUsecase } from './initialize-sequence';
 
-const createStepsMap = (data: Array<[string, StepWithLabel]>) => new Map(data);
-const createSequences = (data: Array<Sequence>) => data;
+const createStepsMap = (data: Array<[string, StepWithLabel & StepWithStaticChoices]>) =>
+  new Map(data);
+const createSequences = (data: Array<SequenceWithName & SequenceWithFirstStepId>) => data;
 
 it('should throw if sequence is not found', () => {
   const sequences = createSequences([]);
   const stepsMap = createStepsMap([]);
 
-  expect(() => initializeSequence(sequences, stepsMap)('income-sequence')).toThrow();
+  expect(() => initializeSequenceUsecase(sequences, stepsMap)('Income sequence name')).toThrow();
 });
 
 it("should throw if sequence's first step is not found", () => {
-  const sequences = createSequences([{ id: 'income-sequence', firstStepId: 'random' }]);
+  const sequences = createSequences([
+    {
+      name: 'Income sequence name',
+      firstStepId: 'random',
+    },
+  ]);
   const stepsMap = createStepsMap([]);
 
-  expect(() => initializeSequence(sequences, stepsMap)('income-sequence')).toThrow();
+  expect(() => initializeSequenceUsecase(sequences, stepsMap)('Income sequence name')).toThrow();
 });
 
 it('should get first step of chosen sequence', () => {
-  const sequenceId = 'income-sequence';
   const stepId = 'price-step-id';
   const stepLabel = 'Price label';
 
-  const sequences = createSequences([{ id: sequenceId, firstStepId: stepId }]);
-  const stepsMap = createStepsMap([[stepId, { label: stepLabel }]]);
+  const sequences = createSequences([
+    {
+      name: 'Income sequence name',
+      firstStepId: stepId,
+    },
+  ]);
+  const stepsMap = createStepsMap([[stepId, { label: stepLabel, staticChoices: ['choice1'] }]]);
 
-  const stepInfo = initializeSequence(sequences, stepsMap)('income-sequence');
+  const stepInfo = initializeSequenceUsecase(sequences, stepsMap)('Income sequence name');
 
-  expect(stepInfo).toEqual({ id: stepId, label: stepLabel });
+  expect(stepInfo).toEqual({ id: stepId, label: stepLabel, choices: ['choice1'] });
 });

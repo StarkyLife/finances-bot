@@ -1,11 +1,15 @@
-import { Sequence } from '../core/data/sequence';
-import { StepWithLabel } from '../core/data/step';
+import { SequenceWithName, SequenceWithFirstStepId } from '../core/data/sequence';
+import { StepWithLabel, StepWithStaticChoices } from '../core/data/step';
 
-export const initializeSequence =
-  (sequences: Sequence[], stepsMap: Map<string, StepWithLabel>) => (sequenceId: string) => {
-    const sequence = sequences.find(({ id }) => id === sequenceId);
+export const initializeSequenceUsecase =
+  (
+    sequences: Array<SequenceWithName & SequenceWithFirstStepId>,
+    stepsMap: Map<string, StepWithLabel & StepWithStaticChoices>,
+  ) =>
+  (sequenceName: string) => {
+    const sequence = sequences.find(({ name }) => name === sequenceName);
 
-    if (!sequence) throw new Error(`${sequenceId} sequence is not found!`);
+    if (!sequence) throw new Error(`${sequenceName} sequence is not found!`);
 
     const stepId = sequence.firstStepId;
     const stepInfo = stepsMap.get(stepId);
@@ -15,5 +19,6 @@ export const initializeSequence =
     return {
       id: stepId,
       label: stepInfo.label,
+      choices: stepInfo.staticChoices
     };
   };
