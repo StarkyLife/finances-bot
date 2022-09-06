@@ -1,12 +1,12 @@
 import { SequenceWithName, SequenceWithFirstStepId } from '../core/data/sequence';
-import { StepWithLabel, StepWithStaticChoices } from '../core/data/step';
+import { StepUI, StepWithLabel, StepWithStaticChoices } from '../core/data/step';
 
 export const initializeSequenceUsecase =
   (
     sequences: Array<SequenceWithName & SequenceWithFirstStepId>,
     stepsMap: Map<string, StepWithLabel & StepWithStaticChoices>,
   ) =>
-  (sequenceName: string) => {
+  (sequenceName: string): StepUI => {
     const sequence = sequences.find(({ name }) => name === sequenceName);
 
     if (!sequence) throw new Error(`${sequenceName} sequence is not found!`);
