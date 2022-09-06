@@ -26,6 +26,7 @@
     "lint": "eslint \"{src,e2e}/**/*.ts\" --max-warnings 0",
     "lint:fix": "yarn lint --fix",
     "test": "jest src",
+    "test:int": "jest --testMatch **/*.int-test.ts",
     "test:e2e": "jest e2e"
   },
   "dependencies": {
