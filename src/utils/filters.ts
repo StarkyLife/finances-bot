@@ -1,1 +1,1 @@
-export const filterOutNulls = <T>(data: T | null): data is T => Boolean(data);
+export const checkExistence = <T>(data: T | undefined): data is T => Boolean(data);

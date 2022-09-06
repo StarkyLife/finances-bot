@@ -1,5 +1,5 @@
 import { StepWithLabel, StoredStep } from '../core/data/step';
-import { filterOutNulls } from '../utils/filters';
+import { checkExistence } from '../utils/filters';
 
 export const presentSequenceData =
   (stepsMap: Map<string, StepWithLabel>) => (getSequenceData: () => StoredStep[]) => {
@@ -10,10 +10,9 @@ export const presentSequenceData =
     return data
       .map(({ id, value }) => {
         const step = stepsMap.get(id);
-
-        if (!step) return null;
+        if (!step) return undefined;
 
         return { id, label: step.label, value };
       })
-      .filter(filterOutNulls);
+      .filter(checkExistence);
   };
