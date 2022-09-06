@@ -1,14 +1,6 @@
-import dotenv from 'dotenv';
+import { configuration } from '../configuration';
 import { SheetInfo } from '../core/data/sheet';
-import { GoogleConfig } from './data/google-config';
 import { appendDataToGoogleSheet } from './google-sheet';
-
-dotenv.config();
-
-const googleConfig: GoogleConfig = {
-  email: process.env.CLIENT_EMAIL,
-  key: process.env.PRIVATE_KEY,
-};
 
 it('should append data', async () => {
   const sheetInfo: SheetInfo = {
@@ -17,6 +9,6 @@ it('should append data', async () => {
   };
 
   await expect(
-    appendDataToGoogleSheet(googleConfig)(sheetInfo, [['Hello', 'my friend']]),
+    appendDataToGoogleSheet(configuration.google)(sheetInfo, [['Hello', 'my friend']]),
   ).resolves.toBeUndefined();
 });
