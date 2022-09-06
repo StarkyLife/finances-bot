@@ -1,7 +1,9 @@
-import { StepWithLabel, StepWithNext } from '../core/data/step';
+import { StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
 import { processStep } from './process-step';
 
-const createStepsMap = (data: Array<[string, StepWithNext & StepWithLabel]>) => new Map(data);
+const createStepsMap = (
+  data: Array<[string, StepWithNext & StepWithLabel & StepWithStaticChoices]>,
+) => new Map(data);
 
 it('should save step data', () => {
   const stepId = 'step id';
@@ -28,6 +30,24 @@ it('should inform about next step', () => {
   expect(nextStepInfo).toEqual({
     id: secondStepId,
     label: 'second label',
+  });
+});
+
+it('should inform about next step with static choices', () => {
+  const firstStepId = 'first step id';
+  const secondStepId = 'second step id';
+  const stepsMap = createStepsMap([
+    [firstStepId, { label: 'first label', next: secondStepId }],
+    [secondStepId, { label: 'second label', staticChoices: ['choice1'], next: undefined }],
+  ]);
+  const saveStep = jest.fn();
+
+  const nextStepInfo = processStep(stepsMap)(saveStep, firstStepId, 'step data');
+
+  expect(nextStepInfo).toEqual({
+    id: secondStepId,
+    label: 'second label',
+    choices: ['choice1'],
   });
 });
 

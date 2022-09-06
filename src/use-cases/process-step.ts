@@ -1,7 +1,7 @@
-import { StepWithLabel, StepWithNext } from '../core/data/step';
+import { StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
 
 export const processStep =
-  (stepsMap: Map<string, StepWithNext & StepWithLabel>) =>
+  (stepsMap: Map<string, StepWithNext & StepWithLabel & StepWithStaticChoices>) =>
   (saveStep: (stepId: string, data: string) => void, stepId: string, stepValue: string) => {
     saveStep(stepId, stepValue);
 
@@ -10,6 +10,7 @@ export const processStep =
 
     return nextStep && {
       id: nextStepId,
-      label: nextStep.label
+      label: nextStep.label,
+      choices: nextStep.staticChoices
     };
   };
