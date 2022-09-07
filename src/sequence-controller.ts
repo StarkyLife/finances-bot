@@ -1,19 +1,10 @@
-import { Sequence } from './core/data/sequence';
-import { Step } from './core/data/step';
+import { configureSequences } from './core/configure-sequences';
+import { incomeSequence } from './sequences/income';
 import { initializeSequenceUsecase } from './use-cases/initialize-sequence';
 
-export const createSequenceController = () => {
-  const sequences: Sequence[] = [
-    { name: 'Поступления', firstStepId: 'income_date' }
-  ];
-  const stepsMap = new Map<string, Step>([
-    ['income_date', {
-      label: 'Введите дату:',
-      staticChoices: ['Сегодня'],
-      next: undefined
-    }]
-  ]);
+const { sequences, stepsMap } = configureSequences([incomeSequence]);
 
+export const createSequenceController = () => {
   const initializeSequence = initializeSequenceUsecase(sequences, stepsMap);
 
   return {

@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start:dev": "nodemon",
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc --project tsconfig.build.json",
     "start": "node dist/index.js",
     "lint": "eslint \"{src,e2e}/**/*.ts\" --max-warnings 0",
     "lint:fix": "yarn lint --fix",
