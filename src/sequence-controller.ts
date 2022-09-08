@@ -5,9 +5,11 @@ import { initializeSequenceUsecase } from './use-cases/initialize-sequence';
 const { sequences, stepsMap } = configureSequences([incomeSequence]);
 
 export const createSequenceController = () => {
+  const rememberCurrentStep = () => {};
   const initializeSequence = initializeSequenceUsecase(sequences, stepsMap);
 
   return {
-    initializeSequence,
+    initializeSequence: (sequenceName: string) =>
+      initializeSequence(rememberCurrentStep, sequenceName),
   };
 };

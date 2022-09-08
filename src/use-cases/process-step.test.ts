@@ -5,58 +5,71 @@ const createStepsMap = (
   data: Array<[string, StepWithNext & StepWithLabel & StepWithStaticChoices]>,
 ) => new Map(data);
 
-it('should save step data', () => {
-  const stepId = 'step id';
-  const stepsMap = createStepsMap([[stepId, { label: 'step label', next: undefined }]]);
+it('should fail if current step is not found', () => {
+  const stepsMap = createStepsMap([]);
   const stepValue = 'step data';
   const saveStep = jest.fn();
+  const getCurrentStep = jest.fn().mockReturnValue(undefined);
+  const rememberCurrentStep = jest.fn();
 
-  processStep(stepsMap)(saveStep, stepId, stepValue);
-
-  expect(saveStep).toHaveBeenCalledWith(stepId, stepValue);
+  expect(() =>
+    processStep(stepsMap)(getCurrentStep, rememberCurrentStep, saveStep, stepValue),
+  ).toThrow();
 });
 
-it('should inform about next step', () => {
-  const firstStepId = 'first step id';
-  const secondStepId = 'second step id';
-  const stepsMap = createStepsMap([
-    [firstStepId, { label: 'first label', next: secondStepId }],
-    [secondStepId, { label: 'second label', next: undefined }],
-  ]);
+it('should save step data', () => {
+  const currentStepId = 'step id';
+  const stepsMap = createStepsMap([[currentStepId, { label: 'step label', next: undefined }]]);
+  const stepValue = 'step data';
   const saveStep = jest.fn();
+  const getCurrentStep = jest.fn().mockReturnValue(currentStepId);
+  const rememberCurrentStep = jest.fn();
 
-  const nextStepInfo = processStep(stepsMap)(saveStep, firstStepId, 'step data');
+  processStep(stepsMap)(getCurrentStep, rememberCurrentStep, saveStep, stepValue);
 
-  expect(nextStepInfo).toEqual({
-    id: secondStepId,
-    label: 'second label',
-  });
+  expect(saveStep).toHaveBeenCalledWith(currentStepId, stepValue);
 });
 
-it('should inform about next step with static choices', () => {
-  const firstStepId = 'first step id';
-  const secondStepId = 'second step id';
+it('should inform about next step and remember it', () => {
+  const currentStepId = 'first step id';
+  const nextStepId = 'second step id';
   const stepsMap = createStepsMap([
-    [firstStepId, { label: 'first label', next: secondStepId }],
-    [secondStepId, { label: 'second label', staticChoices: ['choice1'], next: undefined }],
+    [currentStepId, { label: 'first label', next: nextStepId }],
+    [nextStepId, { label: 'second label', staticChoices: ['choice1'], next: undefined }],
   ]);
   const saveStep = jest.fn();
+  const getCurrentStep = jest.fn().mockReturnValue(currentStepId);
+  const rememberCurrentStep = jest.fn();
 
-  const nextStepInfo = processStep(stepsMap)(saveStep, firstStepId, 'step data');
+  const nextStepInfo = processStep(stepsMap)(
+    getCurrentStep,
+    rememberCurrentStep,
+    saveStep,
+    'step data',
+  );
 
   expect(nextStepInfo).toEqual({
-    id: secondStepId,
+    id: nextStepId,
     label: 'second label',
     choices: ['choice1'],
   });
+  expect(rememberCurrentStep).toHaveBeenCalledWith(nextStepId);
 });
 
-it('should inform about end of sequence', () => {
-  const stepId = 'step id';
-  const stepsMap = createStepsMap([[stepId, { label: 'step label', next: undefined }]]);
+it('should inform about end of sequence and remember it', () => {
+  const currentStepId = 'step id';
+  const stepsMap = createStepsMap([[currentStepId, { label: 'step label', next: undefined }]]);
   const saveStep = jest.fn();
+  const getCurrentStep = jest.fn().mockReturnValue(currentStepId);
+  const rememberCurrentStep = jest.fn();
 
-  const nextStepInfo = processStep(stepsMap)(saveStep, stepId, 'step data');
+  const nextStepInfo = processStep(stepsMap)(
+    getCurrentStep,
+    rememberCurrentStep,
+    saveStep,
+    'step data',
+  );
 
   expect(nextStepInfo).toBeUndefined();
+  expect(rememberCurrentStep).toHaveBeenCalledWith(undefined);
 });

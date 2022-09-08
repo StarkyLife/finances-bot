@@ -6,7 +6,7 @@ export const initializeSequenceUsecase =
     sequences: Array<SequenceWithName & SequenceWithFirstStepId>,
     stepsMap: Map<string, StepWithLabel & StepWithStaticChoices>,
   ) =>
-  (sequenceName: string): StepUI => {
+  (rememberCurrentStep: (stepId: string) => void, sequenceName: string): StepUI => {
     const sequence = sequences.find(({ name }) => name === sequenceName);
 
     if (!sequence) throw new Error(`${sequenceName} sequence is not found!`);
@@ -16,9 +16,11 @@ export const initializeSequenceUsecase =
 
     if (!stepInfo) throw new Error(`Step ${stepId} is not found!`);
 
+    rememberCurrentStep(stepId);
+
     return {
       id: stepId,
       label: stepInfo.label,
-      choices: stepInfo.staticChoices
+      choices: stepInfo.staticChoices,
     };
   };
