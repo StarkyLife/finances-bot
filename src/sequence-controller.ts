@@ -1,8 +1,9 @@
 import { configuration } from './configuration';
 import { configureSequences } from './core/configure-sequences';
-import { SheetInfo } from './core/data/sheet';
-import { StoredStep } from './core/data/step';
+import { activateCurrentStepStorage } from './devices/current-step-storage';
 import { appendDataToGoogleSheet } from './devices/google-sheet';
+import { activateSequenceDataStorage } from './devices/sequence-data-storage';
+import { createUserGateway } from './devices/users';
 import { incomeSequence } from './sequences/income';
 import { initializeSequenceUsecase } from './use-cases/initialize-sequence';
 import { presentSequenceDataUsecase } from './use-cases/present-sequence-data';
@@ -12,23 +13,10 @@ import { saveSequenceUsecase } from './use-cases/save-sequence';
 const { sequences, stepsMap } = configureSequences([incomeSequence]);
 
 export const createSequenceController = () => {
-  let currentStep: string | undefined = undefined;
-  let sequenceData: StoredStep[] = [];
-
-  const rememberCurrentStep = (stepId: string | undefined) => {
-    currentStep = stepId;
-  };
-  const getCurrentStep = () => currentStep;
-  const saveStep = (id: string, value: string) => {
-    sequenceData.push({ id, value });
-  };
-  const getSequenceData = () => sequenceData;
-  const clearSequenceData = () => {
-    sequenceData = [];
-  };
-  const getSheetInfo = (): SheetInfo => ({
-    id: '12x9yqsk_SHPTUx0SfQhXbw2Ad5JUgfO2BVnPRbBvcuA',
-    range: 'Sheet1',
+  const userGateway = createUserGateway({
+    id: configuration.defaultUser,
+    sheetId: configuration.defaultSheetId,
+    range: configuration.defaultRange,
   });
   const saveInGoogleSheet = appendDataToGoogleSheet(configuration.google);
 
@@ -38,17 +26,35 @@ export const createSequenceController = () => {
   const saveSequence = saveSequenceUsecase(stepsMap);
 
   return {
-    initializeSequence: (sequenceName: string) =>
-      initializeSequence(rememberCurrentStep, sequenceName),
-    processStep: (stepValue: string) =>
-      processStep(getCurrentStep, rememberCurrentStep, saveStep, stepValue),
-    getSequenceSummary: () => presentSequenceData(getSequenceData),
-    saveSequenceDataToGoogleSheet: () =>
-      saveSequence({
+    initializeSequence: (userId: string, sequenceName: string) => {
+      userGateway.authorize(userId);
+      const { rememberCurrentStep } = activateCurrentStepStorage(userId);
+
+      return initializeSequence(rememberCurrentStep, sequenceName);
+    },
+    processStep: (userId: string, stepValue: string) => {
+      userGateway.authorize(userId);
+      const { getCurrentStep, rememberCurrentStep } = activateCurrentStepStorage(userId);
+      const { saveStep } = activateSequenceDataStorage(userId);
+
+      return processStep(getCurrentStep, rememberCurrentStep, saveStep, stepValue);
+    },
+    getSequenceSummary: (userId: string) => {
+      userGateway.authorize(userId);
+      const { getSequenceData } = activateSequenceDataStorage(userId);
+
+      return presentSequenceData(getSequenceData);
+    },
+    saveSequenceDataToGoogleSheet: async (userId: string) => {
+      const { getSheetInfo } = userGateway.authorize(userId);
+      const { getSequenceData, clearSequenceData } = activateSequenceDataStorage(userId);
+
+      await saveSequence({
         getSequenceData,
         clearSequenceData,
         getSheetInfo,
         saveInGoogleSheet,
-      }),
+      });
+    },
   };
 };

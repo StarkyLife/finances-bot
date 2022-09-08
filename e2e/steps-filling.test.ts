@@ -1,9 +1,11 @@
 import { createSequenceController } from '../src/sequence-controller';
 
 it('should fill steps and send to google sheet', async () => {
+  const USER_ID = 'StarkyLife';
+
   const controller = createSequenceController();
 
-  const stepInfo = controller.initializeSequence('Поступления');
+  const stepInfo = controller.initializeSequence(USER_ID, 'Поступления');
 
   expect(stepInfo).toEqual({
     id: 'income_date',
@@ -11,7 +13,7 @@ it('should fill steps and send to google sheet', async () => {
     choices: ['Сегодня'],
   });
 
-  const nextStepInfo = controller.processStep('01.01.2022');
+  const nextStepInfo = controller.processStep(USER_ID, '01.01.2022');
 
   expect(nextStepInfo).toEqual({
     id: 'income_category',
@@ -19,7 +21,7 @@ it('should fill steps and send to google sheet', async () => {
     choices: ['Инвестиции'],
   });
 
-  const summary = controller.getSequenceSummary();
+  const summary = controller.getSequenceSummary(USER_ID);
 
   expect(summary).toEqual([
     {
@@ -29,5 +31,5 @@ it('should fill steps and send to google sheet', async () => {
     },
   ]);
 
-  await expect(controller.saveSequenceDataToGoogleSheet()).resolves.toBeUndefined();
+  await expect(controller.saveSequenceDataToGoogleSheet(USER_ID)).resolves.toBeUndefined();
 });
