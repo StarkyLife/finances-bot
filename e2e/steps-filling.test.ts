@@ -1,27 +1,14 @@
-import { createSequenceController } from '../src/sequence-controller';
+import { sequenceController } from '../src/sequence-controller';
 
 it('should fill steps and send to google sheet', async () => {
   const USER_ID = 'StarkyLife';
 
-  const controller = createSequenceController();
+  sequenceController.initializeSequence(USER_ID, 'Поступления');
 
-  const stepInfo = controller.initializeSequence(USER_ID, 'Поступления');
+  sequenceController.processStep(USER_ID, '01.01.2022');
+  sequenceController.processStep(USER_ID, 'Инвестиции');
 
-  expect(stepInfo).toEqual({
-    id: 'income_date',
-    label: 'Введите дату:',
-    choices: ['Сегодня'],
-  });
-
-  const nextStepInfo = controller.processStep(USER_ID, '01.01.2022');
-
-  expect(nextStepInfo).toEqual({
-    id: 'income_category',
-    label: 'Введите категорию:',
-    choices: ['Инвестиции'],
-  });
-
-  const summary = controller.getSequenceSummary(USER_ID);
+  const summary = sequenceController.getSequenceSummary(USER_ID);
 
   expect(summary).toEqual([
     {
@@ -29,7 +16,12 @@ it('should fill steps and send to google sheet', async () => {
       label: 'Дата',
       value: '01.01.2022',
     },
+    {
+      id: 'income_category',
+      label: 'Категория',
+      value: 'Инвестиции',
+    },
   ]);
 
-  await expect(controller.saveSequenceDataToGoogleSheet(USER_ID)).resolves.toBeUndefined();
+  await expect(sequenceController.saveSequenceDataToGoogleSheet(USER_ID)).resolves.toBeUndefined();
 });
