@@ -19,8 +19,7 @@ export const configureSequences = (
     }));
 
     stepsWithModifiedId
-      .reverse()
-      .reduce(
+      .reduceRight(
         (prevStepId: string | undefined, current) =>
           stepsMap.set(current.id, { ...current.config, next: prevStepId }) && current.id,
         undefined,

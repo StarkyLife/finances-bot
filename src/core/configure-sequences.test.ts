@@ -23,9 +23,15 @@ it('should construct sequence', () => {
       name: 'sequenceName',
       steps: [
         {
-          id: 'stepId',
+          id: 'firstStepId',
           config: {
-            label: 'stepLabel',
+            label: 'firstStepLabel',
+          },
+        },
+        {
+          id: 'secondStepId',
+          config: {
+            label: 'secondStepLabel',
           },
         },
       ],
@@ -37,7 +43,7 @@ it('should construct sequence', () => {
   expect(sequences).toEqual([
     {
       name: 'sequenceName',
-      firstStepId: 'sequenceId_stepId',
+      firstStepId: 'sequenceId_firstStepId',
     },
   ]);
 });
@@ -58,6 +64,12 @@ it('should construct steps map', () => {
             transformer: stepTransformer,
           },
         },
+        {
+          id: 'nextStepId',
+          config: {
+            label: 'nextStepLabel',
+          },
+        },
       ],
     },
   ];
@@ -69,10 +81,17 @@ it('should construct steps map', () => {
       [
         'sequenceId_stepId',
         {
-          next: undefined,
+          next: 'sequenceId_nextStepId',
           label: 'stepLabel',
           staticChoices: ['choice1'],
           transformer: stepTransformer,
+        },
+      ],
+      [
+        'sequenceId_nextStepId',
+        {
+          next: undefined,
+          label: 'nextStepLabel',
         },
       ],
     ]),
