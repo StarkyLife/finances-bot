@@ -13,23 +13,22 @@ export const configureSequences = (
     if (!sequenceDescription.steps.length)
       throw new Error(`Sequence ${sequenceDescription.id} has no steps!`);
 
-    const stepsConnectedToSequence = sequenceDescription.steps.map(({ id, config }) => ({
-      id: `${sequenceDescription.id}_${id}`,
-      config,
+    const stepsWithModifiedId = sequenceDescription.steps.map((step) => ({
+      ...step,
+      id: `${sequenceDescription.id}_${step.id}`,
     }));
 
-    stepsConnectedToSequence.reverse().reduce((prevStepId: string | undefined, current) => {
-      stepsMap.set(current.id, {
-        ...current.config,
-        next: prevStepId,
-      });
-
-      return current.id;
-    }, undefined);
+    stepsWithModifiedId
+      .reverse()
+      .reduce(
+        (prevStepId: string | undefined, current) =>
+          stepsMap.set(current.id, { ...current.config, next: prevStepId }) && current.id,
+        undefined,
+      );
 
     return {
       name: sequenceDescription.name,
-      firstStepId: stepsConnectedToSequence[0].id,
+      firstStepId: stepsWithModifiedId[0].id,
     };
   });
 
