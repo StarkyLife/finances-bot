@@ -1,6 +1,6 @@
 import { SheetInfo } from '../core/data/sheet';
 import { StepWithTransformer } from '../core/data/step';
-import { saveSequence } from './save-sequence';
+import { saveSequenceUsecase } from './save-sequence';
 
 const createStepsMap = (data: Array<[string, StepWithTransformer]>) => new Map(data);
 
@@ -21,7 +21,7 @@ it('should save data in google sheet and clear', async () => {
   const saveInGoogleSheet = jest.fn();
   const clearSequenceData = jest.fn();
 
-  await saveSequence(stepsMap)({
+  await saveSequenceUsecase(stepsMap)({
     getSequenceData,
     clearSequenceData,
     getSheetInfo,
@@ -41,7 +41,7 @@ it('should throw if sequence data is not exist', async () => {
   const clearSequenceData = jest.fn();
 
   await expect(
-    saveSequence(stepsMap)({ getSequenceData, clearSequenceData, getSheetInfo, saveInGoogleSheet }),
+    saveSequenceUsecase(stepsMap)({ getSequenceData, clearSequenceData, getSheetInfo, saveInGoogleSheet }),
   ).rejects.toThrow();
 });
 
@@ -55,6 +55,6 @@ it('should throw if sheet id is not found', async () => {
   const clearSequenceData = jest.fn();
 
   await expect(
-    saveSequence(stepsMap)({ getSequenceData, clearSequenceData, getSheetInfo, saveInGoogleSheet }),
+    saveSequenceUsecase(stepsMap)({ getSequenceData, clearSequenceData, getSheetInfo, saveInGoogleSheet }),
   ).rejects.toThrow();
 });

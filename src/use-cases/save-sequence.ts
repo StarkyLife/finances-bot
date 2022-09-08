@@ -2,7 +2,7 @@ import { SheetInfo } from '../core/data/sheet';
 import { StepWithTransformer, StoredStep } from '../core/data/step';
 import { checkExistence } from '../utils/filters';
 
-export const saveSequence =
+export const saveSequenceUsecase =
   (stepsMap: Map<string, StepWithTransformer>) =>
   async (deps: {
     getSequenceData: () => StoredStep[];

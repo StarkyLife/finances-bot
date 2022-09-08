@@ -1,6 +1,6 @@
 import { StepUI, StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
 
-export const processStep =
+export const processStepUsecase =
   (stepsMap: Map<string, StepWithNext & StepWithLabel & StepWithStaticChoices>) =>
   (
     getCurrentStep: () => string | undefined,

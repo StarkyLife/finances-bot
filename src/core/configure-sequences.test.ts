@@ -26,12 +26,14 @@ it('should construct sequence', () => {
           id: 'firstStepId',
           config: {
             label: 'firstStepLabel',
+            summaryLabel: 'firstStepSummary',
           },
         },
         {
           id: 'secondStepId',
           config: {
             label: 'secondStepLabel',
+            summaryLabel: 'secondStepSummary',
           },
         },
       ],
@@ -60,6 +62,7 @@ it('should construct steps map', () => {
           id: 'stepId',
           config: {
             label: 'stepLabel',
+            summaryLabel: 'stepSummary',
             staticChoices: ['choice1'],
             transformer: stepTransformer,
           },
@@ -68,6 +71,7 @@ it('should construct steps map', () => {
           id: 'nextStepId',
           config: {
             label: 'nextStepLabel',
+            summaryLabel: 'nextStepSummary',
           },
         },
       ],
@@ -83,6 +87,7 @@ it('should construct steps map', () => {
         {
           next: 'sequenceId_nextStepId',
           label: 'stepLabel',
+          summaryLabel: 'stepSummary',
           staticChoices: ['choice1'],
           transformer: stepTransformer,
         },
@@ -92,6 +97,7 @@ it('should construct steps map', () => {
         {
           next: undefined,
           label: 'nextStepLabel',
+          summaryLabel: 'nextStepSummary',
         },
       ],
     ]),

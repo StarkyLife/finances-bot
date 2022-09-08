@@ -1,12 +1,12 @@
-import { StepWithLabel } from '../core/data/step';
-import { presentSequenceData } from './present-sequence-data';
+import { StepWithSummaryLabel } from '../core/data/step';
+import { presentSequenceDataUsecase } from './present-sequence-data';
 
-const createStepsMap = (data: Array<[string, StepWithLabel]>) => new Map(data);
+const createStepsMap = (data: Array<[string, StepWithSummaryLabel]>) => new Map(data);
 
 it('should present sequence data', () => {
   const stepsMap = createStepsMap([
-    ['type_id', { label: 'Type' }],
-    ['price_id', { label: 'Price' }],
+    ['type_id', { summaryLabel: 'Type' }],
+    ['price_id', { summaryLabel: 'Price' }],
   ]);
 
   const getSequenceData = jest.fn().mockReturnValue([
@@ -15,7 +15,7 @@ it('should present sequence data', () => {
     { id: 'comment_id', value: 'comment' },
   ]);
 
-  const sequencePresentation = presentSequenceData(stepsMap)(getSequenceData);
+  const sequencePresentation = presentSequenceDataUsecase(stepsMap)(getSequenceData);
 
   expect(sequencePresentation).toEqual([
     { id: 'type_id', label: 'Type', value: 'Income' },
@@ -28,5 +28,5 @@ it('should throw if sequence data is not exist', () => {
 
   const getSequenceData = jest.fn().mockReturnValue([]);
 
-  expect(() => presentSequenceData(stepsMap)(getSequenceData)).toThrow();
+  expect(() => presentSequenceDataUsecase(stepsMap)(getSequenceData)).toThrow();
 });

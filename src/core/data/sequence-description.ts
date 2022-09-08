@@ -1,9 +1,14 @@
 import { SequenceWithName } from './sequence';
-import { StepWithLabel, StepWithStaticChoices, StepWithTransformer } from './step';
+import {
+  StepWithLabel,
+  StepWithStaticChoices,
+  StepWithSummaryLabel,
+  StepWithTransformer,
+} from './step';
 
 export type StepDescription = {
   id: string;
-  config: StepWithLabel & StepWithTransformer & StepWithStaticChoices;
+  config: StepWithLabel & StepWithSummaryLabel & StepWithTransformer & StepWithStaticChoices;
 };
 
 export type SequenceDescription = SequenceWithName & {

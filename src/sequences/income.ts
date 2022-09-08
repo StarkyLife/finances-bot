@@ -9,6 +9,7 @@ export const incomeSequence: SequenceDescription = {
       id: 'date',
       config: {
         label: 'Введите дату:',
+        summaryLabel: 'Дата',
         staticChoices: ['Сегодня'],
         transformer: (value) => (value === 'Сегодня' ? format(new Date(), 'dd.MM.yyyy') : value),
       },
@@ -17,6 +18,7 @@ export const incomeSequence: SequenceDescription = {
       id: 'category',
       config: {
         label: 'Введите категорию:',
+        summaryLabel: 'Категория',
         staticChoices: ['Инвестиции'],
       },
     },
@@ -24,6 +26,7 @@ export const incomeSequence: SequenceDescription = {
       id: 'money-account',
       config: {
         label: 'Введите счет:',
+        summaryLabel: 'Счет',
         staticChoices: ['Кредитка', 'Расчетный счет'],
       },
     },
@@ -31,12 +34,14 @@ export const incomeSequence: SequenceDescription = {
       id: 'amount',
       config: {
         label: 'Введите сумму:',
+        summaryLabel: 'Сумма',
       },
     },
     {
       id: 'comment',
       config: {
         label: 'Введите комментарий:',
+        summaryLabel: 'Комментарий',
       },
     },
   ],
