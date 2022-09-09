@@ -21,8 +21,10 @@ type Configuration = {
   botToken: string;
   google: GoogleConfig;
   defaultUser: string;
-  defaultSheetId: string;
-  defaultRange: string;
+  incomeSheetId: string;
+  incomeRange: string;
+  outcomeSheetId: string;
+  outcomeRange: string;
 };
 
 export const configuration: Configuration = {
@@ -32,6 +34,8 @@ export const configuration: Configuration = {
     key: env('PRIVATE_KEY'),
   },
   defaultUser: env('DEFAULT_USER', ''),
-  defaultSheetId: env('DEFAULT_SHEET_ID', ''),
-  defaultRange: env('DEFAULT_RANGE', ''),
+  incomeSheetId: env('INCOME_SHEET_ID', ''),
+  incomeRange: env('INCOME_RANGE', ''),
+  outcomeSheetId: env('OUTCOME_SHEET_ID', ''),
+  outcomeRange: env('OUTCOME_RANGE', ''),
 };

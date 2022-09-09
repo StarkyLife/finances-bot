@@ -1,5 +1,8 @@
 export type User = {
   id: string;
-  sheetId: string;
-  range: string;
+  sheetInfos: Array<{
+    sequenceId: string;
+    sheetId: string;
+    range: string;
+  }>;
 };

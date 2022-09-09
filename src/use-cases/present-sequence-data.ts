@@ -1,13 +1,15 @@
-import { StepWithSummaryLabel, StoredStep } from '../core/data/step';
+import { StepWithSummaryLabel } from '../core/data/step';
+import { StoredSequence } from '../core/data/stored-sequence';
 import { checkExistence } from '../utils/filters';
 
 export const presentSequenceDataUsecase =
-  (stepsMap: Map<string, StepWithSummaryLabel>) => (getSequenceData: () => StoredStep[]) => {
+  (stepsMap: Map<string, StepWithSummaryLabel>) =>
+  (getSequenceData: () => StoredSequence | undefined) => {
     const data = getSequenceData();
 
-    if (!data.length) throw new Error('No data to present!');
+    if (!data?.steps.length) throw new Error('No data to present!');
 
-    return data
+    return data.steps
       .map(({ id, value }) => {
         const step = stepsMap.get(id);
         if (!step) return undefined;

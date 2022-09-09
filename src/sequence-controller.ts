@@ -15,8 +15,18 @@ const { sequences, stepsMap } = configureSequences([incomeSequence, outcomeSeque
 
 const userGateway = createUserGateway({
   id: configuration.defaultUser,
-  sheetId: configuration.defaultSheetId,
-  range: configuration.defaultRange,
+  sheetInfos: [
+    {
+      sequenceId: incomeSequence.id,
+      sheetId: configuration.incomeSheetId,
+      range: configuration.incomeRange
+    },
+    {
+      sequenceId: outcomeSequence.id,
+      sheetId: configuration.outcomeSheetId,
+      range: configuration.outcomeRange
+    }
+  ],
 });
 const saveInGoogleSheet = appendDataToGoogleSheet(configuration.google);
 
@@ -33,8 +43,9 @@ export const sequenceController = {
   initializeSequence: (userId: string, sequenceName: string) => {
     userGateway.authorize(userId);
     const { rememberCurrentStep } = activateCurrentStepStorage(userId);
+    const { createSequenceData } = activateSequenceDataStorage(userId);
 
-    return initializeSequence(rememberCurrentStep, sequenceName);
+    return initializeSequence(rememberCurrentStep, createSequenceData, sequenceName);
   },
   processStep: (userId: string, stepValue: string) => {
     userGateway.authorize(userId);

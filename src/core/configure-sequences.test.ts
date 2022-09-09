@@ -44,6 +44,7 @@ it('should construct sequence', () => {
 
   expect(sequences).toEqual([
     {
+      id: 'sequenceId',
       name: 'sequenceName',
       firstStepId: 'sequenceId_firstStepId',
     },

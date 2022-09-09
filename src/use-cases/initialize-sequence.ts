@@ -1,12 +1,16 @@
-import { SequenceWithName, SequenceWithFirstStepId } from '../core/data/sequence';
+import { SequenceWithName, SequenceWithFirstStepId, SequenceWithId } from '../core/data/sequence';
 import { StepUI, StepWithLabel, StepWithStaticChoices } from '../core/data/step';
 
 export const initializeSequenceUsecase =
   (
-    sequences: Array<SequenceWithName & SequenceWithFirstStepId>,
+    sequences: Array<SequenceWithId & SequenceWithName & SequenceWithFirstStepId>,
     stepsMap: Map<string, StepWithLabel & StepWithStaticChoices>,
   ) =>
-  (rememberCurrentStep: (stepId: string) => void, sequenceName: string): StepUI => {
+  (
+    rememberCurrentStep: (stepId: string) => void,
+    createSequenceData: (sequenceId: string) => void,
+    sequenceName: string
+  ): StepUI => {
     const sequence = sequences.find(({ name }) => name === sequenceName);
 
     if (!sequence) throw new Error(`${sequenceName} sequence is not found!`);
@@ -17,6 +21,7 @@ export const initializeSequenceUsecase =
     if (!stepInfo) throw new Error(`Step ${stepId} is not found!`);
 
     rememberCurrentStep(stepId);
+    createSequenceData(sequence.id);
 
     return {
       id: stepId,

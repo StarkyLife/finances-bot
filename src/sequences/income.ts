@@ -19,15 +19,17 @@ export const incomeSequence: SequenceDescription = {
       config: {
         label: 'Введите категорию:',
         summaryLabel: 'Категория',
-        staticChoices: ['Инвестиции'],
+        staticChoices: [
+          'инвестиции',
+          'выплаты WB'
+        ],
       },
     },
     {
-      id: 'money-account',
+      id: 'comment',
       config: {
-        label: 'Введите счет:',
-        summaryLabel: 'Счет',
-        staticChoices: ['Кредитка', 'Расчетный счет'],
+        label: 'Введите комментарий:',
+        summaryLabel: 'Комментарий',
       },
     },
     {
@@ -38,10 +40,17 @@ export const incomeSequence: SequenceDescription = {
       },
     },
     {
-      id: 'comment',
+      id: 'money-account',
       config: {
-        label: 'Введите комментарий:',
-        summaryLabel: 'Комментарий',
+        label: 'Введите счет:',
+        summaryLabel: 'Счет',
+        staticChoices: [
+          'кредитка',
+          'личный счет',
+          'инвестиции',
+          'расчетный счет Точка',
+          'оплатил Ильшат',
+        ],
       },
     },
   ],

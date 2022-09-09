@@ -66,9 +66,8 @@ export const outcomeSequence: SequenceDescription = {
         label: 'С какого счета списались деньги?',
         summaryLabel: 'Счет',
         staticChoices: [
-          'карта Тинькофф',
           'кредитка',
-          'с личного счета',
+          'личный счет',
           'инвестиции',
           'расчетный счет Точка',
           'оплатил Ильшат',

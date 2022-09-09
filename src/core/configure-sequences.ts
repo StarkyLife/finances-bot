@@ -26,6 +26,7 @@ export const configureSequences = (
       );
 
     return {
+      id: sequenceDescription.id,
       name: sequenceDescription.name,
       firstStepId: stepsWithModifiedId[0].id,
     };

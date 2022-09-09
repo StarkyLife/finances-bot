@@ -1,15 +1,19 @@
-import { StoredStep } from '../core/data/step';
+import { StoredSequence } from '../core/data/stored-sequence';
 
-const sequenceDataStorage = new Map<string, StoredStep[]>();
+const sequenceDataStorage = new Map<string, StoredSequence>();
 
 export const activateSequenceDataStorage = (userId: string) => ({
-  saveStep: (id: string, value: string) => {
-    const data = sequenceDataStorage.get(userId) ?? [];
-
-    sequenceDataStorage.set(userId, [...data, { id, value }]);
+  createSequenceData: (sequenceId: string) => {
+    sequenceDataStorage.set(userId, { id: sequenceId, steps: [] });
   },
-  getSequenceData: () => sequenceDataStorage.get(userId) ?? [],
+  getSequenceData: () => sequenceDataStorage.get(userId),
   clearSequenceData: () => {
     sequenceDataStorage.delete(userId);
+  },
+  saveStep: (id: string, value: string) => {
+    const data = sequenceDataStorage.get(userId);
+    if (!data) throw new Error("Can't find sequence to save");
+
+    sequenceDataStorage.set(userId, { ...data, steps: [...data.steps, { id, value }] });
   },
 });
