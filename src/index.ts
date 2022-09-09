@@ -5,18 +5,27 @@ import { sequenceController } from './sequence-controller';
 
 const bot = new Telegraf(configuration.botToken);
 
-const availableSequences = sequenceController.getAvailableSequence();
 const submitLabel = 'Сохранить';
+const tryOneMoreTimeLabel = 'Попробовать еще раз';
 
 const getUserId = (ctx: Context) => ctx.from?.username || '';
 
 const goToMainMenu = async (ctx: Context) => {
-  await ctx.replyWithMarkdown(
-    `-----------------------------------\n
-    *Новый раздел*
-    \n-----------------------------------`,
-    Markup.keyboard(availableSequences.map((name) => Markup.button.text(name))),
-  );
+  try {
+    const userId = getUserId(ctx);
+    const availableSequences = sequenceController.getAvailableSequence(userId);
+    await ctx.replyWithMarkdown(
+      `-----------------------------------\n
+      *Новый раздел*
+      \n-----------------------------------`,
+      Markup.keyboard(availableSequences.map((name) => Markup.button.text(name))),
+    );
+  } catch (e) {
+    await ctx.reply(
+      'Не получилось достать разделы. Попробуйте еще раз',
+      Markup.keyboard([Markup.button.text(tryOneMoreTimeLabel)]),
+    );
+  }
 };
 
 const showStep = async (ctx: Context, step: StepUI) => {
@@ -41,16 +50,7 @@ const handleErrors = async (ctx: Context, asyncReplyAction: (userId: string) => 
 };
 
 bot.start(goToMainMenu);
-
-availableSequences.forEach((sequence) => {
-  bot.hears(sequence, async (ctx) => {
-    await handleErrors(ctx, async (userId) => {
-      const step = sequenceController.initializeSequence(userId, sequence);
-      await showStep(ctx, step);
-    });
-  });
-});
-
+bot.hears(tryOneMoreTimeLabel, goToMainMenu);
 bot.hears(submitLabel, async (ctx) => {
   await handleErrors(ctx, async (userId) => {
     await sequenceController.saveSequenceDataToGoogleSheet(userId);
@@ -60,8 +60,17 @@ bot.hears(submitLabel, async (ctx) => {
 });
 
 bot.on('text', async (ctx) => {
+  const message = ctx.message.text;
+
   await handleErrors(ctx, async (userId) => {
-    const nextStep = sequenceController.processStep(userId, ctx.message.text);
+    const availableSequences = sequenceController.getAvailableSequence(userId);
+    if (availableSequences.includes(message)) {
+      const step = sequenceController.initializeSequence(userId, message);
+      await showStep(ctx, step);
+      return;
+    }
+
+    const nextStep = sequenceController.processStep(userId, message);
 
     if (nextStep) {
       await showStep(ctx, nextStep);

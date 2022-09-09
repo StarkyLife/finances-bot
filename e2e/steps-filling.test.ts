@@ -3,7 +3,7 @@ import { sequenceController } from '../src/sequence-controller';
 const USER_ID = 'StarkyLife';
 
 it('should show available sequences', () => {
-  const sequences = sequenceController.getAvailableSequence();
+  const sequences = sequenceController.getAvailableSequence(USER_ID);
 
   expect(sequences).toEqual(['Поступления', 'Расходы']);
 });
