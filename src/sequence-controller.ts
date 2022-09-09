@@ -5,12 +5,13 @@ import { appendDataToGoogleSheet } from './devices/google-sheet';
 import { activateSequenceDataStorage } from './devices/sequence-data-storage';
 import { createUserGateway } from './devices/users';
 import { incomeSequence } from './sequences/income';
+import { outcomeSequence } from './sequences/outcome';
 import { initializeSequenceUsecase } from './use-cases/initialize-sequence';
 import { presentSequenceDataUsecase } from './use-cases/present-sequence-data';
 import { processStepUsecase } from './use-cases/process-step';
 import { saveSequenceUsecase } from './use-cases/save-sequence';
 
-const { sequences, stepsMap } = configureSequences([incomeSequence]);
+const { sequences, stepsMap } = configureSequences([incomeSequence, outcomeSequence]);
 
 const userGateway = createUserGateway({
   id: configuration.defaultUser,
