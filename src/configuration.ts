@@ -3,7 +3,22 @@ import { GoogleConfig } from './devices/data/google-config';
 
 dotenv.config();
 
+const env = (name: string, defaultValue?: string): string => {
+  const value = process.env[name];
+
+  if (defaultValue) {
+    return value || defaultValue;
+  }
+
+  if (!value) {
+    throw new Error(`${name} is not set!`);
+  }
+
+  return value;
+};
+
 type Configuration = {
+  botToken: string;
   google: GoogleConfig;
   defaultUser: string;
   defaultSheetId: string;
@@ -11,11 +26,12 @@ type Configuration = {
 };
 
 export const configuration: Configuration = {
+  botToken: env('BOT_TOKEN'),
   google: {
-    email: process.env.CLIENT_EMAIL,
-    key: process.env.PRIVATE_KEY,
+    email: env('CLIENT_EMAIL'),
+    key: env('PRIVATE_KEY'),
   },
-  defaultUser: process.env.DEFAULT_USER || '',
-  defaultSheetId: process.env.DEFAULT_SHEET_ID || '',
-  defaultRange: process.env.DEFAULT_RANGE || '',
+  defaultUser: env('DEFAULT_USER', ''),
+  defaultSheetId: env('DEFAULT_SHEET_ID', ''),
+  defaultRange: env('DEFAULT_RANGE', ''),
 };

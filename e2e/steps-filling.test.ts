@@ -1,8 +1,14 @@
 import { sequenceController } from '../src/sequence-controller';
 
-it('should fill steps and send to google sheet', async () => {
-  const USER_ID = 'StarkyLife';
+const USER_ID = 'StarkyLife';
 
+it('should show available sequences', () => {
+  const sequences = sequenceController.getAvailableSequence();
+
+  expect(sequences).toEqual(['Поступления', 'Расходы']);
+});
+
+it('should fill steps and send to google sheet', async () => {
   sequenceController.initializeSequence(USER_ID, 'Расходы');
 
   sequenceController.processStep(USER_ID, '01.01.2022');

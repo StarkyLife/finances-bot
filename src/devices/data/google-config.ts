@@ -1,4 +1,4 @@
 export type GoogleConfig = {
-  email?: string;
-  key?: string;
+  email: string;
+  key: string;
 };

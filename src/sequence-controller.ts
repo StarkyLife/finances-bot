@@ -26,6 +26,9 @@ const presentSequenceData = presentSequenceDataUsecase(stepsMap);
 const saveSequence = saveSequenceUsecase(stepsMap);
 
 export const sequenceController = {
+  getAvailableSequence: () => {
+    return sequences.map((s) => s.name);
+  },
   initializeSequence: (userId: string, sequenceName: string) => {
     userGateway.authorize(userId);
     const { rememberCurrentStep } = activateCurrentStepStorage(userId);
