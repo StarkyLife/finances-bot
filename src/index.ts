@@ -11,8 +11,10 @@ const submitLabel = 'Сохранить';
 const getUserId = (ctx: Context) => ctx.from?.username || '';
 
 const goToMainMenu = async (ctx: Context) => {
-  await ctx.reply(
-    'Выберите раздел',
+  await ctx.replyWithMarkdown(
+    `-----------------------------------\n
+    *Новый раздел*
+    \n-----------------------------------`,
     Markup.keyboard(availableSequences.map((name) => Markup.button.text(name))),
   );
 };
