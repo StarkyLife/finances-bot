@@ -19,6 +19,8 @@ const env = (name: string, defaultValue?: string): string => {
 };
 
 type Configuration = {
+  botWebhookDomain: string;
+  botServerPort: string;
   botToken: string;
   google: GoogleConfig;
   defaultUser: string;
@@ -29,6 +31,8 @@ type Configuration = {
 };
 
 export const configuration: Configuration = {
+  botWebhookDomain: env('BOT_WEBHOOK_DOMAIN', ''),
+  botServerPort: env('BOT_SERVER_PORT', '8080'),
   botToken: env('BOT_TOKEN'),
   google: {
     email: env('CLIENT_EMAIL'),

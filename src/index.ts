@@ -42,10 +42,19 @@ bot.on('text', async (ctx) => {
   await replyAnswers(ctx, answers);
 });
 
-bot.launch();
-// bot
-//   .launch({ webhook: { domain: webhookDomain, port: port } })
-//   .then(() => console.log('Webhook bot listening on port', port));
+if (configuration.botWebhookDomain) {
+  const { botWebhookDomain, botServerPort } = configuration;
+  bot
+    .launch({
+      webhook: {
+        domain: botWebhookDomain,
+        port: botServerPort ? +botServerPort : undefined,
+      },
+    })
+    .then(() => console.log('Webhook bot listening on port', botServerPort));
+} else {
+  bot.launch();
+}
 
 process.on('unhandledRejection', (error) => {
   console.error(error);
