@@ -30,6 +30,10 @@ bot.start((ctx) => {
   );
 });
 bot.command('newoperation', initNewOperation);
+bot.command('cancel', async (ctx) => {
+  const answers = sequenceController.cancelSequence(getUserId(ctx));
+  await replyAnswers(ctx, answers);
+});
 bot.hears(sequenceController.labels.tryToGetOperationsOneMoreTime, initNewOperation);
 
 bot.on('text', async (ctx) => {

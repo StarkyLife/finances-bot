@@ -29,3 +29,13 @@ it('should fill steps and send to google sheet', async () => {
     },
   ]);
 });
+
+it('should cancel started sequence', async () => {
+  await sequenceController.processSequence(USER_ID, 'Поступления');
+  expect(sequenceController.cancelSequence(USER_ID)).toEqual([
+    {
+      markdownText: sequenceController.labels.successfulCancel,
+      choices: [],
+    },
+  ]);
+});

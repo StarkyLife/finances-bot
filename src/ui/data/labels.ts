@@ -9,4 +9,6 @@ export const LABELS = {
   tryToGetOperationsOneMoreTime: 'Попробовать достать операции еще раз',
   submit: 'Сохранить',
   successfulSave: 'Все успешно сохранено!',
+  cancel: 'Отменить',
+  successfulCancel: 'Изменения отменены!'
 };

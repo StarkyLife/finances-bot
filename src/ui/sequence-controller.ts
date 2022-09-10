@@ -12,6 +12,7 @@ import { presentSequenceDataUsecase } from '../use-cases/present-sequence-data';
 import { processStepUsecase } from '../use-cases/process-step';
 import { saveSequenceUsecase } from '../use-cases/save-sequence';
 import { LABELS } from './data/labels';
+import { cancelSequenceUsecase } from '../use-cases/cancel-sequence';
 
 const { sequences, stepsMap } = configureSequences([incomeSequence, outcomeSequence]);
 
@@ -67,6 +68,20 @@ export const sequenceController = {
       ];
     }
   },
+  cancelSequence: (userId: string): Answer[] => {
+    userGateway.authorize(userId);
+
+    const { clearSequenceData } = connectToSequenceDataStorage(userId);
+    const { rememberCurrentStep } = connectToCurrentStepStorage(userId);
+
+    cancelSequenceUsecase(clearSequenceData, rememberCurrentStep);
+    return [
+      {
+        markdownText: LABELS.successfulCancel,
+        choices: [],
+      },
+    ];
+  },
   processSequence: async (userId: string, message: string): Promise<Answer[]> => {
     try {
       userGateway.authorize(userId);
@@ -84,6 +99,16 @@ export const sequenceController = {
           {
             markdownText: step.label,
             choices: step.choices ?? [],
+          },
+        ];
+      }
+
+      if (message === LABELS.cancel) {
+        cancelSequenceUsecase(clearSequenceData, rememberCurrentStep);
+        return [
+          {
+            markdownText: LABELS.successfulCancel,
+            choices: [],
           },
         ];
       }
@@ -119,7 +144,7 @@ export const sequenceController = {
             markdownText: summary
               .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
               .join('\n'),
-            choices: [LABELS.submit],
+            choices: [LABELS.submit, LABELS.cancel],
           },
         ];
       }
