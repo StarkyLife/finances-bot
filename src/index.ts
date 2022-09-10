@@ -1,87 +1,40 @@
 import { Context, Markup, Telegraf } from 'telegraf';
 import { configuration } from './configuration';
-import { StepUI } from './core/data/step';
-import { sequenceController } from './sequence-controller';
+import { sequenceController } from './ui/sequence-controller';
+import { Answer } from './ui/data/answer';
 
 const bot = new Telegraf(configuration.botToken);
 
-const submitLabel = 'Сохранить';
-const tryOneMoreTimeLabel = 'Попробовать еще раз';
-
 const getUserId = (ctx: Context) => ctx.from?.username || '';
-
-const goToMainMenu = async (ctx: Context) => {
-  try {
-    const userId = getUserId(ctx);
-    const availableSequences = sequenceController.getAvailableSequence(userId);
+const replyAnswers = async (ctx: Context, answers: Answer[]) => {
+  for (const { markdownText, choices } of answers) {
     await ctx.replyWithMarkdown(
-      `-----------------------------------\n
-      *Новый раздел*
-      \n-----------------------------------`,
-      Markup.keyboard(availableSequences.map((name) => Markup.button.text(name))),
-    );
-  } catch (e) {
-    await ctx.reply(
-      'Не получилось достать разделы. Попробуйте еще раз',
-      Markup.keyboard([Markup.button.text(tryOneMoreTimeLabel)]),
+      markdownText,
+      choices &&
+        (choices.length
+          ? Markup.keyboard(choices.map((choice) => Markup.button.text(choice)))
+          : Markup.removeKeyboard()),
     );
   }
 };
+const initNewOperation = async (ctx: Context) => {
+  const answers = sequenceController.showAvailabelSequences(getUserId(ctx));
+  await replyAnswers(ctx, answers);
+};
 
-const showStep = async (ctx: Context, step: StepUI) => {
-  await ctx.replyWithMarkdown(
-    step.label,
-    step.choices?.length
-      ? Markup.keyboard(step.choices.map((a) => Markup.button.text(a)))
-      : Markup.removeKeyboard(),
+bot.start((ctx) => {
+  ctx.replyWithMarkdown(
+    `*Доступные действия*:\n
+    /newoperation - Новая операция`,
+    Markup.removeKeyboard(),
   );
-};
-
-const handleErrors = async (ctx: Context, asyncReplyAction: (userId: string) => Promise<void>) => {
-  const userId = getUserId(ctx);
-  try {
-    await asyncReplyAction(userId);
-  } catch (e) {
-    const error = e as Error;
-    console.log(error.stack);
-    await ctx.reply(`User: ${userId} - ${error.message}`);
-    await goToMainMenu(ctx);
-  }
-};
-
-bot.start(goToMainMenu);
-bot.hears(tryOneMoreTimeLabel, goToMainMenu);
-bot.hears(submitLabel, async (ctx) => {
-  await handleErrors(ctx, async (userId) => {
-    await sequenceController.saveSequenceDataToGoogleSheet(userId);
-    await ctx.reply('Все успешно сохранено!');
-    await goToMainMenu(ctx);
-  });
 });
+bot.command('newoperation', initNewOperation);
+bot.hears(sequenceController.labels.tryToGetOperationsOneMoreTime, initNewOperation);
 
 bot.on('text', async (ctx) => {
-  const message = ctx.message.text;
-
-  await handleErrors(ctx, async (userId) => {
-    const availableSequences = sequenceController.getAvailableSequence(userId);
-    if (availableSequences.includes(message)) {
-      const step = sequenceController.initializeSequence(userId, message);
-      await showStep(ctx, step);
-      return;
-    }
-
-    const nextStep = sequenceController.processStep(userId, message);
-
-    if (nextStep) {
-      await showStep(ctx, nextStep);
-    } else {
-      const summary = sequenceController.getSequenceSummary(userId);
-      await ctx.replyWithMarkdown(
-        summary.map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`).join('\n'),
-        Markup.keyboard([Markup.button.text(submitLabel)]),
-      );
-    }
-  });
+  const answers = await sequenceController.processSequence(getUserId(ctx), ctx.message.text);
+  await replyAnswers(ctx, answers);
 });
 
 bot.launch();

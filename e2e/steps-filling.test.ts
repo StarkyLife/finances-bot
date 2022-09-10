@@ -1,63 +1,31 @@
-import { sequenceController } from '../src/sequence-controller';
+import { sequenceController } from '../src/ui/sequence-controller';
 
 const USER_ID = 'StarkyLife';
 
-it('should show available sequences', () => {
-  const sequences = sequenceController.getAvailableSequence(USER_ID);
-
-  expect(sequences).toEqual(['Поступления', 'Расходы']);
-});
-
 it('should fill steps and send to google sheet', async () => {
-  sequenceController.initializeSequence(USER_ID, 'Расходы');
-
-  sequenceController.processStep(USER_ID, '01.01.2022');
-  sequenceController.processStep(USER_ID, 'Обучение на курсе');
-  sequenceController.processStep(USER_ID, 'Тестовый комментарий');
-  sequenceController.processStep(USER_ID, '10000');
-  sequenceController.processStep(USER_ID, '1');
-  sequenceController.processStep(USER_ID, 'Кредитка');
-  sequenceController.processStep(USER_ID, 'У блогера');
-
-  const summary = sequenceController.getSequenceSummary(USER_ID);
-
-  expect(summary).toEqual([
+  expect(sequenceController.showAvailabelSequences(USER_ID)).toEqual([
     {
-      id: 'outcome_date',
-      label: 'Дата',
-      value: '01.01.2022',
+      markdownText: sequenceController.labels.newOperation,
     },
     {
-      id: 'outcome_category',
-      label: 'Категория',
-      value: 'Обучение на курсе',
-    },
-    {
-      id: 'outcome_comment',
-      label: 'Комментарий',
-      value: 'Тестовый комментарий',
-    },
-    {
-      id: 'outcome_amount',
-      label: 'Сумма',
-      value: '10000',
-    },
-    {
-      id: 'outcome_quantity',
-      label: 'Количество',
-      value: '1',
-    },
-    {
-      id: 'outcome_money-account',
-      label: 'Счет',
-      value: 'Кредитка',
-    },
-    {
-      id: 'outcome_purchase-place',
-      label: 'Где/у кого куплено',
-      value: 'У блогера',
+      markdownText: sequenceController.labels.chooseOperation,
+      choices: ['Поступления', 'Расходы'],
     },
   ]);
 
-  await expect(sequenceController.saveSequenceDataToGoogleSheet(USER_ID)).resolves.toBeUndefined();
+  await sequenceController.processSequence(USER_ID, 'Поступления');
+  await sequenceController.processSequence(USER_ID, '01.01.2022');
+  await sequenceController.processSequence(USER_ID, 'инвестиции');
+  await sequenceController.processSequence(USER_ID, 'Тестовый комментарий');
+  await sequenceController.processSequence(USER_ID, '10000');
+  await sequenceController.processSequence(USER_ID, 'кредитка');
+
+  await expect(
+    sequenceController.processSequence(USER_ID, sequenceController.labels.submit),
+  ).resolves.toEqual([
+    {
+      markdownText: sequenceController.labels.successfulSave,
+      choices: [],
+    },
+  ]);
 });

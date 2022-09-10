@@ -2,7 +2,7 @@ import { StoredSequence } from '../core/data/stored-sequence';
 
 const sequenceDataStorage = new Map<string, StoredSequence>();
 
-export const activateSequenceDataStorage = (userId: string) => ({
+export const connectToSequenceDataStorage = (userId: string) => ({
   createSequenceData: (sequenceId: string) => {
     sequenceDataStorage.set(userId, { id: sequenceId, steps: [] });
   },

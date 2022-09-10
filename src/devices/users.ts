@@ -1,16 +1,17 @@
 import { SheetInfo } from '../core/data/sheet';
 import { User } from './data/user';
 
-export const createUserGateway = ({ id, sheetInfos }: User) => ({
+export const createUserGateway = (users: User[]) => ({
   authorize: (userId: string) => {
-    if (userId !== id) throw new Error('Authorization failed!');
+    if (!users.some((u) => u.id === userId)) throw new Error('Authorization failed!');
+  },
+  createSheetInfoGetter: (userId: string) => {
+    const user = users.find((u) => u.id === userId);
 
-    return {
-      getSheetInfo: (sequenceId: string): SheetInfo | undefined => {
-        const sheetInfo = sheetInfos.find((i) => i.sequenceId === sequenceId);
+    return (sequenceId: string): SheetInfo | undefined => {
+      const sheetInfo = user?.sheetInfos.find((i) => i.sequenceId === sequenceId);
 
-        return sheetInfo ? { id: sheetInfo.sheetId, range: sheetInfo.range } : undefined;
-      },
+      return sheetInfo ? { id: sheetInfo.sheetId, range: sheetInfo.range } : undefined;
     };
   },
 });

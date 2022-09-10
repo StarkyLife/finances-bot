@@ -1,6 +1,6 @@
 const currentStepStorage = new Map<string, string>();
 
-export const activateCurrentStepStorage = (userId: string) => ({
+export const connectToCurrentStepStorage = (userId: string) => ({
   getCurrentStep: () => currentStepStorage.get(userId),
   rememberCurrentStep: (stepId: string | undefined) => {
     if (!stepId) {

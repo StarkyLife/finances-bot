@@ -1,14 +1,14 @@
 import { configuration } from '../configuration';
 import { SheetInfo } from '../core/data/sheet';
-import { appendDataToGoogleSheet } from './google-sheet';
+import { connectToGoogleSheet } from './google-sheet';
 
 it('should append data', async () => {
   const sheetInfo: SheetInfo = {
-    id: '12x9yqsk_SHPTUx0SfQhXbw2Ad5JUgfO2BVnPRbBvcuA',
+    id: '1CagUnszcw4xYZRT69N_0wiyRE9C7TlwhR76dBRCh5_A',
     range: 'Sheet1',
   };
 
   await expect(
-    appendDataToGoogleSheet(configuration.google)(sheetInfo, [['Hello', 'my friend']]),
+    connectToGoogleSheet(configuration.google).append(sheetInfo, [['Hello', 'my friend']]),
   ).resolves.toBeUndefined();
 });
