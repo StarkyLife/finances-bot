@@ -7,7 +7,7 @@ dotenv.config();
 const env = (name: string, defaultValue?: string): string => {
   const value = process.env[name];
 
-  if (defaultValue) {
+  if (defaultValue !== undefined) {
     return value || defaultValue;
   }
 
