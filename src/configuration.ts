@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+
 import { GoogleConfig } from './devices/data/google-config';
 
 dotenv.config();

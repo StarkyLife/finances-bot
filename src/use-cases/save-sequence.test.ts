@@ -58,7 +58,7 @@ it('should throw if sheet id is not found', async () => {
   const sequenceData = {
     id: 'sequenceId',
     steps: [{ id: 'type_id', value: 'Income' }],
-  }
+  };
 
   const getSequenceData = jest.fn().mockReturnValue(sequenceData);
   const getSheetInfo = jest.fn().mockReturnValue(undefined);

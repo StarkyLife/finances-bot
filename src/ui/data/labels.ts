@@ -10,5 +10,5 @@ export const LABELS = {
   submit: 'Сохранить',
   successfulSave: 'Все успешно сохранено!',
   cancel: 'Отменить',
-  successfulCancel: 'Изменения отменены!'
+  successfulCancel: 'Изменения отменены!',
 };

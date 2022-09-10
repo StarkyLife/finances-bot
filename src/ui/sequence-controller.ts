@@ -6,13 +6,13 @@ import { connectToSequenceDataStorage } from '../devices/sequence-data-storage';
 import { createUserGateway } from '../devices/users';
 import { incomeSequence } from '../sequences/income';
 import { outcomeSequence } from '../sequences/outcome';
-import { Answer } from './data/answer';
+import { cancelSequenceUsecase } from '../use-cases/cancel-sequence';
 import { initializeSequenceUsecase } from '../use-cases/initialize-sequence';
 import { presentSequenceDataUsecase } from '../use-cases/present-sequence-data';
 import { processStepUsecase } from '../use-cases/process-step';
 import { saveSequenceUsecase } from '../use-cases/save-sequence';
+import { Answer } from './data/answer';
 import { LABELS } from './data/labels';
-import { cancelSequenceUsecase } from '../use-cases/cancel-sequence';
 
 const { sequences, stepsMap } = configureSequences([incomeSequence, outcomeSequence]);
 

@@ -1,7 +1,8 @@
 import { Context, Markup, Telegraf } from 'telegraf';
+
 import { configuration } from './configuration';
-import { sequenceController } from './ui/sequence-controller';
 import { Answer } from './ui/data/answer';
+import { sequenceController } from './ui/sequence-controller';
 
 const bot = new Telegraf(configuration.botToken);
 
@@ -42,6 +43,9 @@ bot.on('text', async (ctx) => {
 });
 
 bot.launch();
+// bot
+//   .launch({ webhook: { domain: webhookDomain, port: port } })
+//   .then(() => console.log('Webhook bot listening on port', port));
 
 process.on('unhandledRejection', (error) => {
   console.error(error);

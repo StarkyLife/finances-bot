@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+
 import { SequenceDescription } from '../core/data/sequence-description';
 
 export const outcomeSequence: SequenceDescription = {

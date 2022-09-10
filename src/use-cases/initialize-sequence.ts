@@ -1,4 +1,4 @@
-import { SequenceWithName, SequenceWithFirstStepId, SequenceWithId } from '../core/data/sequence';
+import { SequenceWithFirstStepId, SequenceWithId, SequenceWithName } from '../core/data/sequence';
 import { StepUI, StepWithLabel, StepWithStaticChoices } from '../core/data/step';
 
 export const initializeSequenceUsecase =
@@ -9,7 +9,7 @@ export const initializeSequenceUsecase =
   (
     rememberCurrentStep: (stepId: string) => void,
     createSequenceData: (sequenceId: string) => void,
-    sequenceName: string
+    sequenceName: string,
   ): StepUI => {
     const sequence = sequences.find(({ name }) => name === sequenceName);
 

@@ -18,12 +18,11 @@ export const configureSequences = (
       id: `${sequenceDescription.id}_${step.id}`,
     }));
 
-    stepsWithModifiedId
-      .reduceRight(
-        (prevStepId: string | undefined, current) =>
-          stepsMap.set(current.id, { ...current.config, next: prevStepId }) && current.id,
-        undefined,
-      );
+    stepsWithModifiedId.reduceRight(
+      (prevStepId: string | undefined, current) =>
+        stepsMap.set(current.id, { ...current.config, next: prevStepId }) && current.id,
+      undefined,
+    );
 
     return {
       id: sequenceDescription.id,

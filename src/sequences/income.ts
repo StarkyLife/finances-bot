@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+
 import { SequenceDescription } from '../core/data/sequence-description';
 
 export const incomeSequence: SequenceDescription = {
@@ -19,10 +20,7 @@ export const incomeSequence: SequenceDescription = {
       config: {
         label: 'Введите категорию:',
         summaryLabel: 'Категория',
-        staticChoices: [
-          'инвестиции',
-          'выплаты WB'
-        ],
+        staticChoices: ['инвестиции', 'выплаты WB'],
       },
     },
     {
