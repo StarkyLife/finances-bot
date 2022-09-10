@@ -69,18 +69,29 @@ export const sequenceController = {
     }
   },
   cancelSequence: (userId: string): Answer[] => {
-    userGateway.authorize(userId);
+    try {
+      userGateway.authorize(userId);
 
-    const { clearSequenceData } = connectToSequenceDataStorage(userId);
-    const { rememberCurrentStep } = connectToCurrentStepStorage(userId);
+      const { clearSequenceData } = connectToSequenceDataStorage(userId);
+      const { rememberCurrentStep } = connectToCurrentStepStorage(userId);
 
-    cancelSequenceUsecase(clearSequenceData, rememberCurrentStep);
-    return [
-      {
-        markdownText: LABELS.successfulCancel,
-        choices: [],
-      },
-    ];
+      cancelSequenceUsecase(clearSequenceData, rememberCurrentStep);
+      return [
+        {
+          markdownText: LABELS.successfulCancel,
+          choices: [],
+        },
+      ];
+    } catch (e) {
+      const error = e as Error;
+      console.log(error.stack);
+      return [
+        {
+          markdownText: `User: ${userId} - ${error.message}`,
+          choices: [],
+        },
+      ];
+    }
   },
   processSequence: async (userId: string, message: string): Promise<Answer[]> => {
     try {
