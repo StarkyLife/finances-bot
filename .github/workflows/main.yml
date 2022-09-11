@@ -16,3 +16,18 @@ jobs:
         run: yarn lint && yarn ts:check
       - name: Unit tests
         run: yarn test
+      - name: Prepare enironment variables
+        run: |
+          echo "BOT_TOKEN=random" >> .env
+          echo "CLIENT_EMAIL=\"${{ secrets.CLIENT_EMAIL }}\"" >> .env
+          echo "PRIVATE_KEY=\"${{ secrets.PRIVATE_KEY }}\"" >> .env
+          echo "DEFAULT_USER=StarkyLife" >> .env
+          echo "INCOME_SHEET_ID=1usTDSRi_SENNzdP9GCy5Y0BjS1CD_PIic56HT7d_tiI" >> .env
+          echo "OUTCOME_SHEET_ID=1usTDSRi_SENNzdP9GCy5Y0BjS1CD_PIic56HT7d_tiI" >> .env
+          echo "INCOME_RANGE=ДОХОДЫ" >> .env
+          echo "OUTCOME_RANGE=РАСХОДЫ" >> .env
+      - name: Integration tests
+        run: yarn test:int
+      - name: E2E tests
+        run: yarn test:e2e
+
