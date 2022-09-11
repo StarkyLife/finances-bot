@@ -1,6 +1,6 @@
 {
   "watch": ["src"],
-  "ext": ".ts,.js",
-  "ignore": [],
-  "exec": "ts-node ./src/index.ts"
+  "ext": ".ts",
+  "ignore": ["*.test.ts", "*.int-test.ts"],
+  "exec": "babel-node --extensions \".ts\" ./src/index.ts"
 }
