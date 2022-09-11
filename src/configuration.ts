@@ -32,7 +32,7 @@ type Configuration = {
 
 export const configuration: Configuration = {
   botWebhookDomain: env('BOT_WEBHOOK_DOMAIN', ''),
-  botServerPort: env('BOT_SERVER_PORT', '8080'),
+  botServerPort: env('BOT_SERVER_PORT', ''),
   botToken: env('BOT_TOKEN'),
   google: {
     email: env('CLIENT_EMAIL'),

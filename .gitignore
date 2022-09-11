@@ -110,3 +110,5 @@ reports
 .stryker-tmp
 
 credentials.json
+
+infrastructure/ssl
