@@ -18,10 +18,6 @@ const replyAnswers = async (ctx: Context, answers: Answer[]) => {
     );
   }
 };
-const initNewOperation = async (ctx: Context) => {
-  const answers = sequenceController.showAvailabelSequences(getUserId(ctx));
-  await replyAnswers(ctx, answers);
-};
 
 bot.start((ctx) => {
   ctx.replyWithMarkdown(
@@ -30,12 +26,14 @@ bot.start((ctx) => {
     Markup.removeKeyboard(),
   );
 });
-bot.command('newoperation', initNewOperation);
-bot.command('cancel', async (ctx) => {
-  const answers = sequenceController.cancelSequence(getUserId(ctx));
+bot.command('newoperation', async (ctx: Context) => {
+  const answers = await sequenceController.showAvailabelSequences(getUserId(ctx));
   await replyAnswers(ctx, answers);
 });
-bot.hears(sequenceController.labels.tryToGetOperationsOneMoreTime, initNewOperation);
+bot.command('cancel', async (ctx) => {
+  const answers = await sequenceController.cancelSequence(getUserId(ctx));
+  await replyAnswers(ctx, answers);
+});
 
 bot.on('text', async (ctx) => {
   const answers = await sequenceController.processSequence(getUserId(ctx), ctx.message.text);

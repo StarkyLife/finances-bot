@@ -3,7 +3,7 @@ import { sequenceController } from '../src/ui/sequence-controller';
 const USER_ID = 'StarkyLife';
 
 it('should fill steps and send to google sheet', async () => {
-  expect(sequenceController.showAvailabelSequences(USER_ID)).toEqual([
+  await expect(sequenceController.showAvailabelSequences(USER_ID)).resolves.toEqual([
     {
       markdownText: sequenceController.labels.newOperation,
     },
@@ -32,7 +32,7 @@ it('should fill steps and send to google sheet', async () => {
 
 it('should cancel started sequence', async () => {
   await sequenceController.processSequence(USER_ID, 'Поступления');
-  expect(sequenceController.cancelSequence(USER_ID)).toEqual([
+  await expect(sequenceController.cancelSequence(USER_ID)).resolves.toEqual([
     {
       markdownText: sequenceController.labels.successfulCancel,
       choices: [],
