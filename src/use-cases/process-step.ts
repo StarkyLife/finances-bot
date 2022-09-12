@@ -1,11 +1,13 @@
 import { StepUI, StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
+import { GetCurrentStep, RememberCurrentStep } from './dependencies/current-step';
+import { SaveStep } from './dependencies/sequence-data';
 
 export const processStepUsecase =
   (stepsMap: Map<string, StepWithNext & StepWithLabel & StepWithStaticChoices>) =>
   (
-    getCurrentStep: () => string | undefined,
-    rememberCurrentStep: (stepId: string | undefined) => void,
-    saveStep: (stepId: string, data: string) => void,
+    getCurrentStep: GetCurrentStep,
+    rememberCurrentStep: RememberCurrentStep,
+    saveStep: SaveStep,
     stepValue: string,
   ): StepUI | undefined => {
     const stepId = getCurrentStep();

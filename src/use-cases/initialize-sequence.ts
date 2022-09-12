@@ -1,5 +1,7 @@
 import { SequenceWithFirstStepId, SequenceWithId, SequenceWithName } from '../core/data/sequence';
 import { StepUI, StepWithLabel, StepWithStaticChoices } from '../core/data/step';
+import { RememberCurrentStep } from './dependencies/current-step';
+import { CreateSequenceData } from './dependencies/sequence-data';
 
 export const initializeSequenceUsecase =
   (
@@ -7,8 +9,8 @@ export const initializeSequenceUsecase =
     stepsMap: Map<string, StepWithLabel & StepWithStaticChoices>,
   ) =>
   (
-    rememberCurrentStep: (stepId: string) => void,
-    createSequenceData: (sequenceId: string) => void,
+    rememberCurrentStep: RememberCurrentStep,
+    createSequenceData: CreateSequenceData,
     sequenceName: string,
   ): StepUI => {
     const sequence = sequences.find(({ name }) => name === sequenceName);

@@ -1,6 +1,9 @@
+import { RememberCurrentStep } from './dependencies/current-step';
+import { ClearSequenceData } from './dependencies/sequence-data';
+
 export const cancelSequenceUsecase = (
-  clearSequenceData: () => void,
-  rememberCurrentStep: (stepId: string | undefined) => void,
+  clearSequenceData: ClearSequenceData,
+  rememberCurrentStep: RememberCurrentStep,
 ) => {
   clearSequenceData();
   rememberCurrentStep(undefined);

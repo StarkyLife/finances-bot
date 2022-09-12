@@ -1,9 +1,13 @@
 import { google } from 'googleapis';
 
-import { SheetInfo } from '../core/data/sheet';
+import { SaveInGoogleSheet } from '../use-cases/dependencies/google-sheet';
 import { GoogleConfig } from './data/google-config';
 
-export const connectToGoogleSheet = (config: GoogleConfig) => {
+type GoogleSheet = {
+  append: SaveInGoogleSheet;
+};
+
+export const connectToGoogleSheet = (config: GoogleConfig): GoogleSheet => {
   const { spreadsheets } = google.sheets({
     version: 'v4',
     auth: new google.auth.JWT({
@@ -14,7 +18,7 @@ export const connectToGoogleSheet = (config: GoogleConfig) => {
   });
 
   return {
-    append: async (sheetInfo: SheetInfo, values: Array<Array<string | undefined>>) => {
+    append: async (sheetInfo, values) => {
       // append finds table and adds to new row after last filled
       await spreadsheets.values.append({
         spreadsheetId: sheetInfo.id,
