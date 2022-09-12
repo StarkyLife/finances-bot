@@ -1,18 +1,15 @@
-import { SheetInfo } from '../core/data/sheet';
 import { StepWithTransformer } from '../core/data/step';
-import { StoredSequence } from '../core/data/stored-sequence';
 import { checkExistence } from '../utils/filters';
+import { GetSheetInfo, SaveInGoogleSheet } from './dependencies/google-sheet';
+import { ClearSequenceData, GetSequenceData } from './dependencies/sequence-data';
 
 export const saveSequenceUsecase =
   (stepsMap: Map<string, StepWithTransformer>) =>
   async (deps: {
-    getSequenceData: () => StoredSequence | undefined;
-    clearSequenceData: () => void;
-    getSheetInfo: (sequenceId: string) => SheetInfo | undefined;
-    saveInGoogleSheet: (
-      sheetInfo: SheetInfo,
-      data: Array<Array<string | undefined>>,
-    ) => Promise<void>;
+    getSequenceData: GetSequenceData;
+    clearSequenceData: ClearSequenceData;
+    getSheetInfo: GetSheetInfo;
+    saveInGoogleSheet: SaveInGoogleSheet;
   }) => {
     const sequenceData = deps.getSequenceData();
     if (!sequenceData?.steps.length) throw new Error('No data to save!');
