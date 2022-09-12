@@ -19,6 +19,15 @@ const replyAnswers = async (ctx: Context, answers: Answer[]) => {
   }
 };
 
+let chatIdForMetrics: number | undefined;
+
+export const metricsGateway = {
+  saveChatId: (chatId: number) => {
+    chatIdForMetrics = chatId;
+  },
+  getChatId: () => chatIdForMetrics,
+};
+
 bot.start((ctx) => {
   ctx.replyWithMarkdown(
     `*Доступные действия*:\n
@@ -34,9 +43,27 @@ bot.command('cancel', async (ctx) => {
   const answers = await sequenceController.cancelSequence(getUserId(ctx));
   await replyAnswers(ctx, answers);
 });
+bot.command('initmetrics', async (ctx) => {
+  const userId = getUserId(ctx);
+  if (!configuration.metricsUser || userId !== configuration.metricsUser) {
+    await ctx.reply('У вас нет прав на это действие!');
+    return;
+  }
+  metricsGateway.saveChatId(ctx.message.chat.id);
+});
 
 bot.on('text', async (ctx) => {
-  const answers = await sequenceController.processSequence(getUserId(ctx), ctx.message.text);
+  const userId = getUserId(ctx);
+  const answers = await sequenceController.processSequence(userId, ctx.message.text, {
+    afterSave: async () => {
+      const metricsChatId = metricsGateway.getChatId();
+      if (!metricsChatId) return;
+      await ctx.telegram.sendMessage(
+        metricsChatId,
+        `User ${userId} saved sequence to the Google Sheet!`,
+      );
+    },
+  });
   await replyAnswers(ctx, answers);
 });
 
