@@ -89,7 +89,11 @@ export const sequenceController = {
         },
       ];
     }),
-  processSequence: (userId: string, message: string): Promise<Answer[]> =>
+  processSequence: (
+    userId: string,
+    message: string,
+    events?: { afterSave: () => Promise<void> },
+  ): Promise<Answer[]> =>
     handleErrors(async () => {
       userGateway.authorize(userId);
 
@@ -127,6 +131,9 @@ export const sequenceController = {
           getSheetInfo,
           saveInGoogleSheet,
         });
+
+        if (events?.afterSave) await events.afterSave();
+
         return [
           {
             markdownText: LABELS.successfulSave,
