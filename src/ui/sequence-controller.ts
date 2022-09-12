@@ -40,10 +40,26 @@ const processStep = processStepUsecase(stepsMap);
 const presentSequenceData = presentSequenceDataUsecase(stepsMap);
 const saveSequence = saveSequenceUsecase(stepsMap);
 
+const handleErrors = async (action: () => Promise<Answer[]>) => {
+  try {
+    const answers = await action();
+    return answers;
+  } catch (e) {
+    const error = e as Error;
+    console.log(error.stack);
+    return [
+      {
+        markdownText: error.message,
+        choices: [],
+      },
+    ];
+  }
+};
+
 export const sequenceController = {
   labels: LABELS,
-  showAvailabelSequences: (userId: string): Answer[] => {
-    try {
+  showAvailabelSequences: (userId: string): Promise<Answer[]> =>
+    handleErrors(async () => {
       userGateway.authorize(userId);
 
       const availableSequences = sequences.map((s) => s.name);
@@ -57,19 +73,9 @@ export const sequenceController = {
           choices: availableSequences,
         },
       ];
-    } catch (e) {
-      console.log((e as Error).stack);
-
-      return [
-        {
-          markdownText: LABELS.operationsGetFail,
-          choices: [LABELS.tryToGetOperationsOneMoreTime],
-        },
-      ];
-    }
-  },
-  cancelSequence: (userId: string): Answer[] => {
-    try {
+    }),
+  cancelSequence: (userId: string): Promise<Answer[]> =>
+    handleErrors(async () => {
       userGateway.authorize(userId);
 
       const { clearSequenceData } = connectToSequenceDataStorage(userId);
@@ -82,19 +88,9 @@ export const sequenceController = {
           choices: [],
         },
       ];
-    } catch (e) {
-      const error = e as Error;
-      console.log(error.stack);
-      return [
-        {
-          markdownText: `User: ${userId} - ${error.message}`,
-          choices: [],
-        },
-      ];
-    }
-  },
-  processSequence: async (userId: string, message: string): Promise<Answer[]> => {
-    try {
+    }),
+  processSequence: (userId: string, message: string): Promise<Answer[]> =>
+    handleErrors(async () => {
       userGateway.authorize(userId);
 
       const getSheetInfo = userGateway.createSheetInfoGetter(userId);
@@ -159,15 +155,5 @@ export const sequenceController = {
           },
         ];
       }
-    } catch (e) {
-      const error = e as Error;
-      console.log(error.stack);
-      return [
-        {
-          markdownText: `User: ${userId} - ${error.message}`,
-          choices: [],
-        },
-      ];
-    }
-  },
+    }),
 };
