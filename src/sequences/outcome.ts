@@ -37,6 +37,7 @@ export const outcomeSequence: SequenceDescription = {
           'Закупка оборудования',
           'Маркетинг',
           'Самостоятельный выкуп',
+          'Кредиты',
         ],
       },
     },
