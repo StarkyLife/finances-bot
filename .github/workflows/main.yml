@@ -26,6 +26,7 @@ jobs:
           echo "OUTCOME_SHEET_ID=1usTDSRi_SENNzdP9GCy5Y0BjS1CD_PIic56HT7d_tiI" >> .env
           echo "INCOME_RANGE=ДОХОДЫ" >> .env
           echo "OUTCOME_RANGE=РАСХОДЫ" >> .env
+          echo "WILDBERRIES_TOKEN=\"${{ secrets.WILDBERRIES_TOKEN }}\"" >> .env
       - name: Integration tests
         run: yarn test:int
       - name: E2E tests
