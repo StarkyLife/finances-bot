@@ -1,13 +1,17 @@
 import { configuration } from '../configuration';
 import { configureSequences } from '../core/configure-sequences';
+import { connectToChatsStorage } from '../devices/chatsStorage';
 import { connectToCurrentStepStorage } from '../devices/current-step-storage';
 import { connectToGoogleSheet } from '../devices/google-sheet';
+import { connectToOrdersCache } from '../devices/orders-cache';
 import { connectToSequenceDataStorage } from '../devices/sequence-data-storage';
 import { createUserGateway } from '../devices/users';
+import { connectToWildberries } from '../devices/wildberries';
 import { incomeSequence } from '../sequences/income';
 import { outcomeSequence } from '../sequences/outcome';
 import { cancelSequenceUsecase } from '../use-cases/cancel-sequence';
 import { initializeSequenceUsecase } from '../use-cases/initialize-sequence';
+import { presentNewOrdersUsecase } from '../use-cases/present-new-orders';
 import { presentSequenceDataUsecase } from '../use-cases/present-sequence-data';
 import { processStepUsecase } from '../use-cases/process-step';
 import { saveSequenceUsecase } from '../use-cases/save-sequence';
@@ -19,6 +23,7 @@ const { sequences, stepsMap } = configureSequences([incomeSequence, outcomeSeque
 const userGateway = createUserGateway([
   {
     id: configuration.defaultUser,
+    wildberriesToken: configuration.wildberriesToken,
     sheetInfos: [
       {
         sequenceId: incomeSequence.id,
@@ -56,7 +61,7 @@ const handleErrors = async (action: () => Promise<Answer[]>) => {
   }
 };
 
-export const sequenceController = {
+export const botController = {
   labels: LABELS,
   showAvailabelSequences: (userId: string): Promise<Answer[]> =>
     handleErrors(async () => {
@@ -157,4 +162,54 @@ export const sequenceController = {
         ];
       }
     }),
+  rememberUserChat: (userId: string, chatId: string) =>
+    handleErrors(async () => {
+      userGateway.authorize(userId);
+      const chatsStorage = connectToChatsStorage(userId);
+
+      chatsStorage.rememberChat(chatId);
+
+      return [{ markdownText: LABELS.youAreRemembered }];
+    }),
+  createWBNotificationsChecker:
+    (messageSender: (chatId: string, markdownText: string) => Promise<void>) => async () => {
+      const users = userGateway.getAllUsers();
+      await Promise.all(
+        users.map(async (user) => {
+          if (!user.wildberriesToken) return;
+
+          const chatsStorage = connectToChatsStorage(user.id);
+
+          const chatId = chatsStorage.getChat();
+          if (!chatId) return;
+
+          const wildberriesSDK = connectToWildberries(user.wildberriesToken);
+          const ordersCache = connectToOrdersCache(user.id);
+          const presentNewOrders = presentNewOrdersUsecase(
+            wildberriesSDK.getOrders,
+            ordersCache.getOrdersIds,
+            ordersCache.updateOrdersIds,
+          );
+
+          try {
+            const orders = await presentNewOrders();
+            for (const order of orders) {
+              await messageSender(
+                chatId,
+                [
+                  `*Номер заказа* - ${order.id}`,
+                  `*Дата создания* - ${order.dateCreated}`,
+                  `*Пункт назначения* - ${order.officeAddress}`,
+                  `*Цена* - ${order.price}`,
+                ].join('\n'),
+              );
+            }
+          } catch (e) {
+            console.log(
+              `User ${user.id} could not get new orders! Reason: ${(e as Error).message}`,
+            );
+          }
+        }),
+      );
+    },
 };

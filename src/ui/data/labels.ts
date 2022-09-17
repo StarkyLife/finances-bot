@@ -10,4 +10,5 @@ export const LABELS = {
   successfulSave: 'Все успешно сохранено!',
   cancel: 'Отменить',
   successfulCancel: 'Изменения отменены!',
+  youAreRemembered: 'Мы вас запомнили!',
 };
