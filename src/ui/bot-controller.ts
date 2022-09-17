@@ -56,7 +56,7 @@ const handleErrors = async (action: () => Promise<Answer[]>) => {
   }
 };
 
-export const sequenceController = {
+export const botController = {
   labels: LABELS,
   showAvailabelSequences: (userId: string): Promise<Answer[]> =>
     handleErrors(async () => {

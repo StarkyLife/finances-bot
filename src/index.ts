@@ -2,7 +2,7 @@ import { Context, Markup, Telegraf } from 'telegraf';
 
 import { configuration } from './configuration';
 import { Answer } from './ui/data/answer';
-import { sequenceController } from './ui/sequence-controller';
+import { botController } from './ui/bot-controller';
 
 const bot = new Telegraf(configuration.botToken);
 
@@ -27,17 +27,17 @@ bot.start((ctx) => {
   );
 });
 bot.command('newoperation', async (ctx: Context) => {
-  const answers = await sequenceController.showAvailabelSequences(getUserId(ctx));
+  const answers = await botController.showAvailabelSequences(getUserId(ctx));
   await replyAnswers(ctx, answers);
 });
 bot.command('cancel', async (ctx) => {
-  const answers = await sequenceController.cancelSequence(getUserId(ctx));
+  const answers = await botController.cancelSequence(getUserId(ctx));
   await replyAnswers(ctx, answers);
 });
 
 bot.on('text', async (ctx) => {
   const userId = getUserId(ctx);
-  const answers = await sequenceController.processSequence(userId, ctx.message.text);
+  const answers = await botController.processSequence(userId, ctx.message.text);
   await replyAnswers(ctx, answers);
 });
 
