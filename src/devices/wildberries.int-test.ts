@@ -3,7 +3,7 @@ import { connectToWildberries } from './wildberries';
 
 describe('wildberries', () => {
   it('should be able to get orders', async () => {
-    const token = configuration.wildberriesKey;
+    const token = configuration.wildberriesToken;
     const wildberriesSDK = connectToWildberries(token);
 
     const orders = await wildberriesSDK.getOrders('any');
