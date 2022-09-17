@@ -1,25 +1,27 @@
 import { format } from 'date-fns';
 
-import { OrderPresentation, OrderStatus, WBOrder } from '../core/data/orders';
+import { OrderPresentation } from '../core/data/orders';
+import { GetOrdersFromCache, UpdateOrdersInCache } from './dependencies/orders-cache';
+import { GetOrdersFromWildberries } from './dependencies/wildberries';
 
 export const presentNewOrdersUsecase =
   (
-    getOrdersFromWildberries: (status: OrderStatus) => Promise<WBOrder[]>,
-    getKnownOrdersIds: () => string[],
-    updateKnownOrders: (ids: string[]) => void,
+    getOrdersFromWildberries: GetOrdersFromWildberries,
+    getOrdersFromCache: GetOrdersFromCache,
+    updateOrdersInCache: UpdateOrdersInCache,
   ) =>
   async (): Promise<OrderPresentation[]> => {
     const orders = await getOrdersFromWildberries('new');
 
-    const knownOrdersIds = getKnownOrdersIds();
+    const knownOrdersIds = getOrdersFromCache();
     const unknownOrders = orders.filter((o) => !knownOrdersIds.includes(o.id));
 
-    updateKnownOrders(orders.map((o) => o.id));
+    updateOrdersInCache(orders.map((o) => o.id));
 
     return unknownOrders.map((o) => ({
       id: o.id,
       dateCreated: format(new Date(o.dateCreated), 'dd.MM.yyyy HH:mm'),
       officeAddress: o.officeAddress,
-      price: `${o.totalPrice / 100} ${o.currency}`,
+      price: `${o.price / 100} ${o.currency}`,
     }));
   };

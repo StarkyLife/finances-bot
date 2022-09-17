@@ -5,7 +5,7 @@ export type WBOrder = {
   dateCreated: string;
   officeAddress: string;
   currency: string;
-  totalPrice: number;
+  price: number;
 };
 
 export type OrderPresentation = {

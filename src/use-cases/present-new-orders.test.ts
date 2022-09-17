@@ -6,7 +6,7 @@ const createWBOrder = (order: Partial<WBOrder>): WBOrder => ({
   dateCreated: new Date('2022-09-17T10:00:00').toISOString(),
   officeAddress: 'г Москва (Россия), Большой Казенный переулок, д. 10с2',
   currency: 'RUB',
-  totalPrice: 135355,
+  price: 135355,
   ...order,
 });
 
@@ -15,13 +15,13 @@ it('should present only unknown new orders', async () => {
   const knownOrdersIds = ['knownOrderId'];
 
   const getOrdersFromWildberries = jest.fn().mockResolvedValue(orders);
-  const getKnownOrdersIds = jest.fn().mockReturnValue(knownOrdersIds);
-  const updateKnownOrders = jest.fn();
+  const getOrdersFromCache = jest.fn().mockReturnValue(knownOrdersIds);
+  const updateOrdersInCache = jest.fn();
 
   const ordersPresentation = await presentNewOrdersUsecase(
     getOrdersFromWildberries,
-    getKnownOrdersIds,
-    updateKnownOrders,
+    getOrdersFromCache,
+    updateOrdersInCache,
   )();
 
   expect(ordersPresentation).toEqual([
@@ -39,10 +39,14 @@ it('should update cache', async () => {
   const knownOrdersIds = ['knownOrderId', 'outdatedOrderId'];
 
   const getOrdersFromWildberries = jest.fn().mockResolvedValue(orders);
-  const getKnownOrdersIds = jest.fn().mockReturnValue(knownOrdersIds);
-  const updateKnownOrders = jest.fn();
+  const getOrdersFromCache = jest.fn().mockReturnValue(knownOrdersIds);
+  const updateOrdersInCache = jest.fn();
 
-  await presentNewOrdersUsecase(getOrdersFromWildberries, getKnownOrdersIds, updateKnownOrders)();
+  await presentNewOrdersUsecase(
+    getOrdersFromWildberries,
+    getOrdersFromCache,
+    updateOrdersInCache,
+  )();
 
-  expect(updateKnownOrders).toHaveBeenCalledWith(orders.map((o) => o.id));
+  expect(updateOrdersInCache).toHaveBeenCalledWith(orders.map((o) => o.id));
 });
