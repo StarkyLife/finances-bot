@@ -28,7 +28,6 @@ type Configuration = {
   incomeRange: string;
   outcomeSheetId: string;
   outcomeRange: string;
-  metricsUser: string;
 };
 
 export const configuration: Configuration = {
@@ -44,5 +43,4 @@ export const configuration: Configuration = {
   incomeRange: env('INCOME_RANGE', ''),
   outcomeSheetId: env('OUTCOME_SHEET_ID', ''),
   outcomeRange: env('OUTCOME_RANGE', ''),
-  metricsUser: env('METRICS_USER', ''),
 };
