@@ -3,7 +3,7 @@ import { presentNewOrdersUsecase } from './present-new-orders';
 
 const createWBOrder = (order: Partial<WBOrder>): WBOrder => ({
   id: 'standardOrderId',
-  dateCreated: new Date('2022-09-17T10:00:00').toISOString(),
+  dateCreated: '2022-09-17T10:00:00+03:00',
   officeAddress: 'г Москва (Россия), Большой Казенный переулок, д. 10с2',
   currency: 'RUB',
   price: 135355,
