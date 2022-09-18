@@ -12,12 +12,12 @@ export const saveSequenceUsecase =
     saveInGoogleSheet: SaveInGoogleSheet;
   }) => {
     const sequenceData = deps.getSequenceData();
-    if (!sequenceData?.steps.length) throw new Error('No data to save!');
+    if (sequenceData.isNone()) throw new Error('No data to save!');
 
-    const sheetInfo = deps.getSheetInfo(sequenceData.id);
+    const sheetInfo = deps.getSheetInfo(sequenceData.value.id);
     if (!sheetInfo) throw new Error('No sheet info!');
 
-    const sheetRow = sequenceData.steps
+    const sheetRow = sequenceData.value.steps
       .map(({ id, value }) => {
         const step = stepsMap.get(id);
         if (!step) return undefined;

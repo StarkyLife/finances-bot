@@ -1,3 +1,5 @@
+import { fromNullable } from '@sweet-monads/maybe';
+
 import { StoredSequence } from '../core/data/stored-sequence';
 import {
   ClearSequenceData,
@@ -19,7 +21,7 @@ export const connectToSequenceDataStorage = (userId: string): SequenceDataStorag
   createSequenceData: (sequenceId) => {
     sequenceDataStorage.set(userId, { id: sequenceId, steps: [] });
   },
-  getSequenceData: () => sequenceDataStorage.get(userId),
+  getSequenceData: () => fromNullable(sequenceDataStorage.get(userId)),
   clearSequenceData: () => {
     sequenceDataStorage.delete(userId);
   },

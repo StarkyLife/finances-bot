@@ -6,9 +6,9 @@ export const presentSequenceDataUsecase =
   (stepsMap: Map<string, StepWithSummaryLabel>) => (getSequenceData: GetSequenceData) => {
     const data = getSequenceData();
 
-    if (!data?.steps.length) throw new Error('No data to present!');
+    if (data.isNone()) throw new Error('No data to present!');
 
-    return data.steps
+    return data.value.steps
       .map(({ id, value }) => {
         const step = stepsMap.get(id);
         if (!step) return undefined;

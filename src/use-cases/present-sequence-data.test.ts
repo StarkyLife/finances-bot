@@ -1,3 +1,5 @@
+import { just, none } from '@sweet-monads/maybe';
+
 import { StepWithSummaryLabel } from '../core/data/step';
 import { presentSequenceDataUsecase } from './present-sequence-data';
 
@@ -9,14 +11,16 @@ it('should present sequence data', () => {
     ['price_id', { summaryLabel: 'Price' }],
   ]);
 
-  const getSequenceData = jest.fn().mockReturnValue({
-    id: 'sequenceId',
-    steps: [
-      { id: 'type_id', value: 'Income' },
-      { id: 'price_id', value: '100' },
-      { id: 'comment_id', value: 'comment' },
-    ],
-  });
+  const getSequenceData = jest.fn().mockReturnValue(
+    just({
+      id: 'sequenceId',
+      steps: [
+        { id: 'type_id', value: 'Income' },
+        { id: 'price_id', value: '100' },
+        { id: 'comment_id', value: 'comment' },
+      ],
+    }),
+  );
 
   const sequencePresentation = presentSequenceDataUsecase(stepsMap)(getSequenceData);
 
@@ -29,7 +33,7 @@ it('should present sequence data', () => {
 it('should throw if sequence data is not exist', () => {
   const stepsMap = createStepsMap([]);
 
-  const getSequenceData = jest.fn().mockReturnValue({ steps: [] });
+  const getSequenceData = jest.fn().mockReturnValue(none());
 
   expect(() => presentSequenceDataUsecase(stepsMap)(getSequenceData)).toThrow();
 });

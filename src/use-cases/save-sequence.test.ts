@@ -1,3 +1,5 @@
+import { just, none } from '@sweet-monads/maybe';
+
 import { SheetInfo } from '../core/data/sheet';
 import { StepWithTransformer } from '../core/data/step';
 import { saveSequenceUsecase } from './save-sequence';
@@ -19,7 +21,7 @@ it('should save data in google sheet and clear', async () => {
     ['transform_step_id', { transformer: (value) => value + ' transformed' }],
   ]);
 
-  const getSequenceData = jest.fn().mockReturnValue(sequenceData);
+  const getSequenceData = jest.fn().mockReturnValue(just(sequenceData));
   const getSheetInfo = jest.fn().mockReturnValue(sheetInfo);
   const saveInGoogleSheet = jest.fn();
   const clearSequenceData = jest.fn();
@@ -38,7 +40,7 @@ it('should save data in google sheet and clear', async () => {
 it('should throw if sequence data is not exist', async () => {
   const stepsMap = createStepsMap([]);
 
-  const getSequenceData = jest.fn().mockReturnValue(undefined);
+  const getSequenceData = jest.fn().mockReturnValue(none());
   const getSheetInfo = jest.fn();
   const saveInGoogleSheet = jest.fn();
   const clearSequenceData = jest.fn();
@@ -60,7 +62,7 @@ it('should throw if sheet id is not found', async () => {
     steps: [{ id: 'type_id', value: 'Income' }],
   };
 
-  const getSequenceData = jest.fn().mockReturnValue(sequenceData);
+  const getSequenceData = jest.fn().mockReturnValue(just(sequenceData));
   const getSheetInfo = jest.fn().mockReturnValue(undefined);
   const saveInGoogleSheet = jest.fn();
   const clearSequenceData = jest.fn();

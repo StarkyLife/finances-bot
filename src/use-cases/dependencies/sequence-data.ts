@@ -1,7 +1,9 @@
+import { Maybe } from '@sweet-monads/maybe';
+
 import { StoredSequence } from '../../core/data/stored-sequence';
 
 export type CreateSequenceData = (sequenceId: string) => void;
-export type GetSequenceData = () => StoredSequence | undefined;
+export type GetSequenceData = () => Maybe<StoredSequence>;
 export type ClearSequenceData = () => void;
 
 export type SaveStep = (stepId: string, data: string) => void;
