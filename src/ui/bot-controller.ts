@@ -181,7 +181,7 @@ export const botController = {
           const chatsStorage = connectToChatsStorage(user.id);
 
           const chatId = chatsStorage.getChat();
-          if (!chatId) return;
+          if (chatId.isNone()) return;
 
           const wildberriesSDK = connectToWildberries(user.wildberriesToken);
           const ordersCache = connectToOrdersCache(user.id);
@@ -195,7 +195,7 @@ export const botController = {
             const orders = await presentNewOrders();
             for (const order of orders) {
               await messageSender(
-                chatId,
+                chatId.value,
                 [
                   `*Номер заказа* - ${order.id}`,
                   `*Дата создания* - ${order.dateCreated}`,

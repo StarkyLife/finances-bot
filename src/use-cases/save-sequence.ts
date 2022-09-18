@@ -1,11 +1,10 @@
-import { fromNullable } from '@sweet-monads/maybe';
-
 import { StepWithTransformer } from '../core/data/step';
+import { StepsMap } from '../core/data/steps-map';
 import { GetSheetInfo, SaveInGoogleSheet } from './dependencies/google-sheet';
 import { ClearSequenceData, GetSequenceData } from './dependencies/sequence-data';
 
 export const saveSequenceUsecase =
-  (stepsMap: Map<string, StepWithTransformer>) =>
+  (stepsMap: StepsMap<StepWithTransformer>) =>
   async (deps: {
     getSequenceData: GetSequenceData;
     clearSequenceData: ClearSequenceData;
@@ -19,7 +18,7 @@ export const saveSequenceUsecase =
     if (sheetInfo.isNone()) throw new Error('No sheet info!');
 
     const sheetRow = sequenceData.value.steps.map(({ id, value }) =>
-      fromNullable(stepsMap.get(id)).map((s) => s.transformer?.(value) || value),
+      stepsMap.getBy(id).map((s) => s.transformer?.(value) || value),
     );
 
     await deps.saveInGoogleSheet(sheetInfo.value, [sheetRow]);

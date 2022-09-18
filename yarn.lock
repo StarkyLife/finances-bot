@@ -1492,6 +1492,13 @@
   resolved "https://registry.yarnpkg.com/@sweet-monads/interfaces/-/interfaces-3.1.0.tgz#49cdd0a697ad025ce05201b0eb495d86a007ed51"
   integrity sha512-/65uh95U8yWmnVQVQWPh6v49vTDomXYttDJot86JOpWjP2gpStnPX02uTH/WMla0vfGb5KP7mFZMKUvom/QqkA==
 
+"@sweet-monads/iterator@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@sweet-monads/iterator/-/iterator-3.1.0.tgz#1256127be389964c9de8c6764a171e0890058bb4"
+  integrity sha512-oxFJwbVqT+xGBxNdh8Snr/XFF4G1nPDmZUHIiURTx/9flsTS55oja/Y2l2poNWngHZFE1Ai9wQTcbgoyCCyhbw==
+  dependencies:
+    "@sweet-monads/maybe" "^3.1.0"
+
 "@sweet-monads/maybe@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@sweet-monads/maybe/-/maybe-3.1.0.tgz#c1a64feeaa773bf9e4f40d4add7d40c30f1fa446"

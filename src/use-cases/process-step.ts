@@ -1,11 +1,10 @@
-import { fromNullable } from '@sweet-monads/maybe';
-
 import { StepUI, StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
+import { StepsMap } from '../core/data/steps-map';
 import { GetCurrentStep, RememberCurrentStep } from './dependencies/current-step';
 import { SaveStep } from './dependencies/sequence-data';
 
 export const processStepUsecase =
-  (stepsMap: Map<string, StepWithNext & StepWithLabel & StepWithStaticChoices>) =>
+  (stepsMap: StepsMap<StepWithNext & StepWithLabel & StepWithStaticChoices>) =>
   (
     getCurrentStep: GetCurrentStep,
     rememberCurrentStep: RememberCurrentStep,
@@ -17,16 +16,17 @@ export const processStepUsecase =
 
     saveStep(stepId.value, stepValue);
 
-    const nextStepId = stepsMap.get(stepId.value)?.next;
-    const nextStep = nextStepId && stepsMap.get(nextStepId);
+    const nextStepId = stepsMap.getBy(stepId.value).chain((s) => s.next);
 
-    rememberCurrentStep(fromNullable(nextStepId));
+    rememberCurrentStep(nextStepId);
 
-    return nextStep
-      ? {
-          id: nextStepId,
-          label: nextStep.label,
-          choices: nextStep.staticChoices,
-        }
-      : undefined;
+    const nextStep = nextStepId.chain((id) =>
+      stepsMap.getBy(id).map(({ label, staticChoices }) => ({
+        id,
+        label,
+        choices: staticChoices,
+      })),
+    );
+
+    return nextStep.value;
   };

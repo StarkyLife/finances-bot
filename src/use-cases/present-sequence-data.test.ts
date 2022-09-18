@@ -1,12 +1,14 @@
 import { just, none } from '@sweet-monads/maybe';
 
+import { createStepsMap } from '../core/create-steps-map';
 import { StepWithSummaryLabel } from '../core/data/step';
 import { presentSequenceDataUsecase } from './present-sequence-data';
 
-const createStepsMap = (data: Array<[string, StepWithSummaryLabel]>) => new Map(data);
+const createTestStepsMap = (data: Array<[string, StepWithSummaryLabel]>) =>
+  createStepsMap(new Map(data));
 
 it('should present sequence data', () => {
-  const stepsMap = createStepsMap([
+  const stepsMap = createTestStepsMap([
     ['type_id', { summaryLabel: 'Type' }],
     ['price_id', { summaryLabel: 'Price' }],
   ]);
@@ -31,7 +33,7 @@ it('should present sequence data', () => {
 });
 
 it('should throw if sequence data is not exist', () => {
-  const stepsMap = createStepsMap([]);
+  const stepsMap = createTestStepsMap([]);
 
   const getSequenceData = jest.fn().mockReturnValue(none());
 

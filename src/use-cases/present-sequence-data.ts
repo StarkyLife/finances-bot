@@ -1,19 +1,20 @@
+import LazyIterator from '@sweet-monads/iterator';
+
 import { StepWithSummaryLabel } from '../core/data/step';
-import { checkExistence } from '../utils/filters';
+import { StepsMap } from '../core/data/steps-map';
 import { GetSequenceData } from './dependencies/sequence-data';
 
 export const presentSequenceDataUsecase =
-  (stepsMap: Map<string, StepWithSummaryLabel>) => (getSequenceData: GetSequenceData) => {
+  (stepsMap: StepsMap<StepWithSummaryLabel>) => (getSequenceData: GetSequenceData) => {
     const data = getSequenceData();
 
     if (data.isNone()) throw new Error('No data to present!');
 
-    return data.value.steps
-      .map(({ id, value }) => {
-        const step = stepsMap.get(id);
-        if (!step) return undefined;
+    const summary = LazyIterator.from(data.value.steps)
+      .filterMap(({ id, value }) =>
+        stepsMap.getBy(id).map((s) => ({ id, label: s.summaryLabel, value })),
+      )
+      .collect();
 
-        return { id, label: step.summaryLabel, value };
-      })
-      .filter(checkExistence);
+    return Array.from(summary);
   };

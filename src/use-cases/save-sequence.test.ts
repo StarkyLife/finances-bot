@@ -1,10 +1,12 @@
 import { just, none } from '@sweet-monads/maybe';
 
+import { createStepsMap } from '../core/create-steps-map';
 import { SheetInfo } from '../core/data/sheet';
 import { StepWithTransformer } from '../core/data/step';
 import { saveSequenceUsecase } from './save-sequence';
 
-const createStepsMap = (data: Array<[string, StepWithTransformer]>) => new Map(data);
+const createTestStepsMap = (data: Array<[string, StepWithTransformer]>) =>
+  createStepsMap(new Map(data));
 
 it('should save data in google sheet and clear', async () => {
   const sheetInfo: SheetInfo = { id: 'sheetId', range: 'range' };
@@ -16,7 +18,7 @@ it('should save data in google sheet and clear', async () => {
       { id: 'non_existent_step_id', value: 'Not exists value' },
     ],
   };
-  const stepsMap = createStepsMap([
+  const stepsMap = createTestStepsMap([
     ['type_id', {}],
     ['transform_step_id', { transformer: (value) => value + ' transformed' }],
   ]);
@@ -40,7 +42,7 @@ it('should save data in google sheet and clear', async () => {
 });
 
 it('should throw if sequence data is not exist', async () => {
-  const stepsMap = createStepsMap([]);
+  const stepsMap = createTestStepsMap([]);
 
   const getSequenceData = jest.fn().mockReturnValue(none());
   const getSheetInfo = jest.fn();
@@ -58,7 +60,7 @@ it('should throw if sequence data is not exist', async () => {
 });
 
 it('should throw if sheet id is not found', async () => {
-  const stepsMap = createStepsMap([]);
+  const stepsMap = createTestStepsMap([]);
   const sequenceData = {
     id: 'sequenceId',
     steps: [{ id: 'type_id', value: 'Income' }],
