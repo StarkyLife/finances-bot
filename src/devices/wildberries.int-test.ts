@@ -1,12 +1,12 @@
 import { configuration } from '../configuration';
 import { connectToWildberries } from './wildberries';
 
-describe('wildberries', () => {
+describe.skip('wildberries', () => {
   it('should be able to get orders', async () => {
     const token = configuration.wildberriesToken;
     const wildberriesSDK = connectToWildberries(token);
 
-    const orders = await wildberriesSDK.getOrders('any');
+    const orders = await wildberriesSDK.getOrders();
 
     expect(orders).toEqual(
       expect.arrayContaining([

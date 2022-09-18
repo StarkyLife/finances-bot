@@ -10,12 +10,11 @@ type WildberriesSDK = {
 
 export const connectToWildberries = (token: string): WildberriesSDK => {
   return {
-    getOrders: async (status) => {
+    getOrders: async () => {
       const params = new URLSearchParams({
         date_start: formatRFC3339(startOfToday()),
         take: '100',
         skip: '0',
-        status: status === 'new' ? '0' : '',
       });
 
       const response = await axios.get<WildberriesOrdersResponse>(
