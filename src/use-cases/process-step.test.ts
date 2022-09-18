@@ -1,3 +1,4 @@
+import { right } from '@sweet-monads/either';
 import { just, none } from '@sweet-monads/maybe';
 
 import { createStepsMap } from '../core/create-steps-map';
@@ -11,20 +12,25 @@ const createTestStepsMap = (
 it('should fail if current step is not found', () => {
   const stepsMap = createTestStepsMap([]);
   const stepValue = 'step data';
-  const saveStep = jest.fn();
+  const saveStep = jest.fn().mockReturnValue(right(undefined));
   const getCurrentStep = jest.fn().mockReturnValue(none());
   const rememberCurrentStep = jest.fn();
 
-  expect(() =>
-    processStepUsecase(stepsMap)(getCurrentStep, rememberCurrentStep, saveStep, stepValue),
-  ).toThrow();
+  const nextStepInfo = processStepUsecase(stepsMap)(
+    getCurrentStep,
+    rememberCurrentStep,
+    saveStep,
+    stepValue,
+  );
+
+  expect(nextStepInfo.isLeft()).toBe(true);
 });
 
 it('should save step data', () => {
   const currentStepId = 'step id';
   const stepsMap = createTestStepsMap([[currentStepId, { label: 'step label', next: none() }]]);
   const stepValue = 'step data';
-  const saveStep = jest.fn();
+  const saveStep = jest.fn().mockReturnValue(right(undefined));
   const getCurrentStep = jest.fn().mockReturnValue(just(currentStepId));
   const rememberCurrentStep = jest.fn();
 
@@ -40,7 +46,7 @@ it('should inform about next step and remember it', () => {
     [currentStepId, { label: 'first label', next: just(nextStepId) }],
     [nextStepId, { label: 'second label', staticChoices: ['choice1'], next: none() }],
   ]);
-  const saveStep = jest.fn();
+  const saveStep = jest.fn().mockReturnValue(right(undefined));
   const getCurrentStep = jest.fn().mockReturnValue(just(currentStepId));
   const rememberCurrentStep = jest.fn();
 
@@ -51,7 +57,7 @@ it('should inform about next step and remember it', () => {
     'step data',
   );
 
-  expect(nextStepInfo).toEqual({
+  expect(nextStepInfo.unwrap().unwrap()).toEqual({
     id: nextStepId,
     label: 'second label',
     choices: ['choice1'],
@@ -62,7 +68,7 @@ it('should inform about next step and remember it', () => {
 it('should inform about end of sequence and remember it', () => {
   const currentStepId = 'step id';
   const stepsMap = createTestStepsMap([[currentStepId, { label: 'step label', next: none() }]]);
-  const saveStep = jest.fn();
+  const saveStep = jest.fn().mockReturnValue(right(undefined));
   const getCurrentStep = jest.fn().mockReturnValue(just(currentStepId));
   const rememberCurrentStep = jest.fn();
 
@@ -73,6 +79,6 @@ it('should inform about end of sequence and remember it', () => {
     'step data',
   );
 
-  expect(nextStepInfo).toBeUndefined();
+  expect(nextStepInfo.unwrap().isNone()).toBe(true);
   expect(rememberCurrentStep).toHaveBeenCalledWith(none());
 });

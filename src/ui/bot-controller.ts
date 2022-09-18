@@ -1,3 +1,5 @@
+import { just } from '@sweet-monads/maybe';
+
 import { configuration } from '../configuration';
 import { configureSequences } from '../core/configure-sequences';
 import { connectToChatsStorage } from '../devices/chatsStorage';
@@ -141,26 +143,28 @@ export const botController = {
         ];
       }
 
-      const nextStep = processStep(getCurrentStep, rememberCurrentStep, saveStep, message);
-
-      if (nextStep) {
-        return [
-          {
-            markdownText: nextStep.label,
-            choices: nextStep.choices ?? [],
-          },
-        ];
-      } else {
-        const summary = presentSequenceData(getSequenceData);
-        return [
-          {
-            markdownText: summary
-              .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
-              .join('\n'),
-            choices: [LABELS.submit, LABELS.cancel],
-          },
-        ];
-      }
+      return processStep(getCurrentStep, rememberCurrentStep, saveStep, message)
+        .map((nextStep): Answer[] =>
+          nextStep
+            .map((s) => [
+              {
+                markdownText: s.label,
+                choices: s.choices ?? [],
+              },
+            ])
+            .or(
+              just([
+                {
+                  markdownText: presentSequenceData(getSequenceData)
+                    .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
+                    .join('\n'),
+                  choices: [LABELS.submit, LABELS.cancel],
+                },
+              ]),
+            )
+            .unwrap(),
+        )
+        .unwrap();
     }),
   rememberUserChat: (userId: string, chatId: string) =>
     handleErrors(async () => {

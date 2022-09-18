@@ -6,7 +6,7 @@ import { ClearSequenceData } from './dependencies/sequence-data';
 export const cancelSequenceUsecase = (
   clearSequenceData: ClearSequenceData,
   rememberCurrentStep: RememberCurrentStep,
-) => {
+): void => {
   clearSequenceData();
   rememberCurrentStep(none());
 };
