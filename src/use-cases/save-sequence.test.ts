@@ -22,7 +22,7 @@ it('should save data in google sheet and clear', async () => {
   ]);
 
   const getSequenceData = jest.fn().mockReturnValue(just(sequenceData));
-  const getSheetInfo = jest.fn().mockReturnValue(sheetInfo);
+  const getSheetInfo = jest.fn().mockReturnValue(just(sheetInfo));
   const saveInGoogleSheet = jest.fn();
   const clearSequenceData = jest.fn();
 
@@ -33,7 +33,9 @@ it('should save data in google sheet and clear', async () => {
     saveInGoogleSheet,
   });
 
-  expect(saveInGoogleSheet).toHaveBeenCalledWith(sheetInfo, [['Income', 'Value transformed']]);
+  expect(saveInGoogleSheet).toHaveBeenCalledWith(sheetInfo, [
+    [just('Income'), just('Value transformed'), none()],
+  ]);
   expect(clearSequenceData).toHaveBeenCalled();
 });
 
@@ -63,7 +65,7 @@ it('should throw if sheet id is not found', async () => {
   };
 
   const getSequenceData = jest.fn().mockReturnValue(just(sequenceData));
-  const getSheetInfo = jest.fn().mockReturnValue(undefined);
+  const getSheetInfo = jest.fn().mockReturnValue(none());
   const saveInGoogleSheet = jest.fn();
   const clearSequenceData = jest.fn();
 

@@ -1,5 +1,6 @@
+import { fromNullable } from '@sweet-monads/maybe';
+
 import { StepWithTransformer } from '../core/data/step';
-import { checkExistence } from '../utils/filters';
 import { GetSheetInfo, SaveInGoogleSheet } from './dependencies/google-sheet';
 import { ClearSequenceData, GetSequenceData } from './dependencies/sequence-data';
 
@@ -15,18 +16,13 @@ export const saveSequenceUsecase =
     if (sequenceData.isNone()) throw new Error('No data to save!');
 
     const sheetInfo = deps.getSheetInfo(sequenceData.value.id);
-    if (!sheetInfo) throw new Error('No sheet info!');
+    if (sheetInfo.isNone()) throw new Error('No sheet info!');
 
-    const sheetRow = sequenceData.value.steps
-      .map(({ id, value }) => {
-        const step = stepsMap.get(id);
-        if (!step) return undefined;
+    const sheetRow = sequenceData.value.steps.map(({ id, value }) =>
+      fromNullable(stepsMap.get(id)).map((s) => s.transformer?.(value) || value),
+    );
 
-        return step.transformer?.(value) || value;
-      })
-      .filter(checkExistence);
-
-    await deps.saveInGoogleSheet(sheetInfo, [sheetRow]);
+    await deps.saveInGoogleSheet(sheetInfo.value, [sheetRow]);
 
     deps.clearSequenceData();
   };
