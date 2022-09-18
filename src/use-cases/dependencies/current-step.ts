@@ -1,2 +1,4 @@
-export type RememberCurrentStep = (stepId: string | undefined) => void;
-export type GetCurrentStep = () => string | undefined;
+import { Maybe } from '@sweet-monads/maybe';
+
+export type RememberCurrentStep = (stepId: Maybe<string>) => void;
+export type GetCurrentStep = () => Maybe<string>;

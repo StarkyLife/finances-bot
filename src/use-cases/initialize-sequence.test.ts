@@ -1,3 +1,5 @@
+import { just } from '@sweet-monads/maybe';
+
 import { SequenceWithFirstStepId, SequenceWithId, SequenceWithName } from '../core/data/sequence';
 import { StepWithLabel, StepWithStaticChoices } from '../core/data/step';
 import { initializeSequenceUsecase } from './initialize-sequence';
@@ -66,6 +68,6 @@ it('should get first step of chosen sequence and remember as current', () => {
   );
 
   expect(stepInfo).toEqual({ id: stepId, label: stepLabel, choices: ['choice1'] });
-  expect(rememberCurrentStep).toHaveBeenCalledWith(stepId);
+  expect(rememberCurrentStep).toHaveBeenCalledWith(just(stepId));
   expect(createSequenceData).toHaveBeenCalledWith(sequenceId);
 });

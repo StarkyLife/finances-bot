@@ -1,3 +1,5 @@
+import { none } from '@sweet-monads/maybe';
+
 import { RememberCurrentStep } from './dependencies/current-step';
 import { ClearSequenceData } from './dependencies/sequence-data';
 
@@ -6,5 +8,5 @@ export const cancelSequenceUsecase = (
   rememberCurrentStep: RememberCurrentStep,
 ) => {
   clearSequenceData();
-  rememberCurrentStep(undefined);
+  rememberCurrentStep(none());
 };

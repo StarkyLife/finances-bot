@@ -1,3 +1,5 @@
+import { just, none } from '@sweet-monads/maybe';
+
 import { StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
 import { processStepUsecase } from './process-step';
 
@@ -9,7 +11,7 @@ it('should fail if current step is not found', () => {
   const stepsMap = createStepsMap([]);
   const stepValue = 'step data';
   const saveStep = jest.fn();
-  const getCurrentStep = jest.fn().mockReturnValue(undefined);
+  const getCurrentStep = jest.fn().mockReturnValue(none());
   const rememberCurrentStep = jest.fn();
 
   expect(() =>
@@ -22,7 +24,7 @@ it('should save step data', () => {
   const stepsMap = createStepsMap([[currentStepId, { label: 'step label', next: undefined }]]);
   const stepValue = 'step data';
   const saveStep = jest.fn();
-  const getCurrentStep = jest.fn().mockReturnValue(currentStepId);
+  const getCurrentStep = jest.fn().mockReturnValue(just(currentStepId));
   const rememberCurrentStep = jest.fn();
 
   processStepUsecase(stepsMap)(getCurrentStep, rememberCurrentStep, saveStep, stepValue);
@@ -38,7 +40,7 @@ it('should inform about next step and remember it', () => {
     [nextStepId, { label: 'second label', staticChoices: ['choice1'], next: undefined }],
   ]);
   const saveStep = jest.fn();
-  const getCurrentStep = jest.fn().mockReturnValue(currentStepId);
+  const getCurrentStep = jest.fn().mockReturnValue(just(currentStepId));
   const rememberCurrentStep = jest.fn();
 
   const nextStepInfo = processStepUsecase(stepsMap)(
@@ -53,14 +55,14 @@ it('should inform about next step and remember it', () => {
     label: 'second label',
     choices: ['choice1'],
   });
-  expect(rememberCurrentStep).toHaveBeenCalledWith(nextStepId);
+  expect(rememberCurrentStep).toHaveBeenCalledWith(just(nextStepId));
 });
 
 it('should inform about end of sequence and remember it', () => {
   const currentStepId = 'step id';
   const stepsMap = createStepsMap([[currentStepId, { label: 'step label', next: undefined }]]);
   const saveStep = jest.fn();
-  const getCurrentStep = jest.fn().mockReturnValue(currentStepId);
+  const getCurrentStep = jest.fn().mockReturnValue(just(currentStepId));
   const rememberCurrentStep = jest.fn();
 
   const nextStepInfo = processStepUsecase(stepsMap)(
@@ -71,5 +73,5 @@ it('should inform about end of sequence and remember it', () => {
   );
 
   expect(nextStepInfo).toBeUndefined();
-  expect(rememberCurrentStep).toHaveBeenCalledWith(undefined);
+  expect(rememberCurrentStep).toHaveBeenCalledWith(none());
 });

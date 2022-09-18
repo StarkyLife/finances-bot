@@ -1,3 +1,5 @@
+import { just } from '@sweet-monads/maybe';
+
 import { SequenceWithFirstStepId, SequenceWithId, SequenceWithName } from '../core/data/sequence';
 import { StepUI, StepWithLabel, StepWithStaticChoices } from '../core/data/step';
 import { RememberCurrentStep } from './dependencies/current-step';
@@ -22,7 +24,7 @@ export const initializeSequenceUsecase =
 
     if (!stepInfo) throw new Error(`Step ${stepId} is not found!`);
 
-    rememberCurrentStep(stepId);
+    rememberCurrentStep(just(stepId));
     createSequenceData(sequence.id);
 
     return {

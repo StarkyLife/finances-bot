@@ -1,3 +1,5 @@
+import { fromNullable } from '@sweet-monads/maybe';
+
 import { StepUI, StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
 import { GetCurrentStep, RememberCurrentStep } from './dependencies/current-step';
 import { SaveStep } from './dependencies/sequence-data';
@@ -11,14 +13,14 @@ export const processStepUsecase =
     stepValue: string,
   ): StepUI | undefined => {
     const stepId = getCurrentStep();
-    if (!stepId) throw new Error('Current step is not found!');
+    if (stepId.isNone()) throw new Error('Current step is not found!');
 
-    saveStep(stepId, stepValue);
+    saveStep(stepId.value, stepValue);
 
-    const nextStepId = stepsMap.get(stepId)?.next;
+    const nextStepId = stepsMap.get(stepId.value)?.next;
     const nextStep = nextStepId && stepsMap.get(nextStepId);
 
-    rememberCurrentStep(nextStepId);
+    rememberCurrentStep(fromNullable(nextStepId));
 
     return nextStep
       ? {

@@ -1,3 +1,5 @@
+import { fromNullable } from '@sweet-monads/maybe';
+
 import { GetCurrentStep, RememberCurrentStep } from '../use-cases/dependencies/current-step';
 
 type CurrentStepStorage = {
@@ -8,12 +10,12 @@ type CurrentStepStorage = {
 const currentStepStorage = new Map<string, string>();
 
 export const connectToCurrentStepStorage = (userId: string): CurrentStepStorage => ({
-  getCurrentStep: () => currentStepStorage.get(userId),
+  getCurrentStep: () => fromNullable(currentStepStorage.get(userId)),
   rememberCurrentStep: (stepId) => {
-    if (!stepId) {
+    if (stepId.isNone()) {
       currentStepStorage.delete(userId);
       return;
     }
-    currentStepStorage.set(userId, stepId);
+    currentStepStorage.set(userId, stepId.value);
   },
 });
