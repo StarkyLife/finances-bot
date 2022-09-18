@@ -11,7 +11,7 @@ export const presentNewOrdersUsecase =
     updateOrdersInCache: UpdateOrdersInCache,
   ) =>
   async (): Promise<OrderPresentation[]> => {
-    const orders = await getOrdersFromWildberries('new');
+    const orders = await getOrdersFromWildberries();
 
     const knownOrdersIds = getOrdersFromCache();
     const unknownOrders = orders.filter((o) => !knownOrdersIds.includes(o.id));

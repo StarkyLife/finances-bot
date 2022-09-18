@@ -1,5 +1,3 @@
-export type OrderStatus = 'any' | 'new';
-
 export type WBOrder = {
   id: string;
   dateCreated: string;
