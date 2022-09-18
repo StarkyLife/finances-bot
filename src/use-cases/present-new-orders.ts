@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 import { OrderPresentation } from '../core/data/orders';
 import { GetOrdersFromCache, UpdateOrdersInCache } from './dependencies/orders-cache';
@@ -20,7 +20,7 @@ export const presentNewOrdersUsecase =
 
     return unknownOrders.map((o) => ({
       id: o.id,
-      dateCreated: format(new Date(o.dateCreated), 'dd.MM.yyyy HH:mm'),
+      dateCreated: formatInTimeZone(new Date(o.dateCreated), 'Europe/Moscow', 'dd.MM.yyyy HH:mm'),
       officeAddress: o.officeAddress,
       price: `${o.price / 100} ${o.currency}`,
     }));
