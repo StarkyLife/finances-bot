@@ -26,7 +26,7 @@ it('should present sequence data', () => {
 
   const sequencePresentation = presentSequenceDataUsecase(stepsMap)(getSequenceData);
 
-  expect(sequencePresentation).toEqual([
+  expect(sequencePresentation.unwrap()).toEqual([
     { id: 'type_id', label: 'Type', value: 'Income' },
     { id: 'price_id', label: 'Price', value: '100' },
   ]);
@@ -37,5 +37,5 @@ it('should throw if sequence data is not exist', () => {
 
   const getSequenceData = jest.fn().mockReturnValue(none());
 
-  expect(() => presentSequenceDataUsecase(stepsMap)(getSequenceData)).toThrow();
+  expect(presentSequenceDataUsecase(stepsMap)(getSequenceData).isLeft()).toBe(true);
 });

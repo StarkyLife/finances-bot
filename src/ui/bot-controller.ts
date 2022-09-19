@@ -2,6 +2,7 @@ import { just } from '@sweet-monads/maybe';
 
 import { configuration } from '../configuration';
 import { configureSequences } from '../core/configure-sequences';
+import { StepUI } from '../core/data/step';
 import { connectToChatsStorage } from '../devices/chatsStorage';
 import { connectToCurrentStepStorage } from '../devices/current-step-storage';
 import { connectToGoogleSheet } from '../devices/google-sheet';
@@ -143,27 +144,32 @@ export const botController = {
         ];
       }
 
+      const handleEndOfSequence = () =>
+        presentSequenceData(getSequenceData)
+          .map((summary): Answer[] => [
+            {
+              markdownText: summary
+                .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
+                .join('\n'),
+              choices: [LABELS.submit, LABELS.cancel],
+            },
+          ])
+          .unwrap();
+      const handleNewStep = (step: StepUI): Answer[] => [
+        {
+          markdownText: step.label,
+          choices: step.choices ?? [],
+        },
+      ];
+
       return processStep(getCurrentStep, rememberCurrentStep, saveStep, message)
-        .map((nextStep): Answer[] =>
+        .map((nextStep) =>
           nextStep
-            .map((s) => [
-              {
-                markdownText: s.label,
-                choices: s.choices ?? [],
-              },
-            ])
-            .or(
-              just([
-                {
-                  markdownText: presentSequenceData(getSequenceData)
-                    .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
-                    .join('\n'),
-                  choices: [LABELS.submit, LABELS.cancel],
-                },
-              ]),
-            )
-            .unwrap(),
+            .map((s) => () => handleNewStep(s))
+            .or(just(handleEndOfSequence))
+            .apply(just(undefined)),
         )
+        .unwrap()
         .unwrap();
     }),
   rememberUserChat: (userId: string, chatId: string) =>
