@@ -107,14 +107,14 @@ export const botController = {
 
       const availableSequences = sequences.map((s) => s.name);
       if (availableSequences.includes(message)) {
-        const step = initializeSequence(rememberCurrentStep, createSequenceData, message);
-
-        return [
-          {
-            markdownText: step.label,
-            choices: step.choices ?? [],
-          },
-        ];
+        return initializeSequence(rememberCurrentStep, createSequenceData, message)
+          .map((step) => [
+            {
+              markdownText: step.label,
+              choices: step.choices ?? [],
+            },
+          ])
+          .unwrap();
       }
 
       if (message === LABELS.cancel) {

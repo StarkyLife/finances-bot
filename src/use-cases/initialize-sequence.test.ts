@@ -17,13 +17,13 @@ it('should throw if sequence is not found', () => {
   const rememberCurrentStep = jest.fn();
   const createSequenceData = jest.fn();
 
-  expect(() =>
+  expect(
     initializeSequenceUsecase(sequences, stepsMap)(
       rememberCurrentStep,
       createSequenceData,
       'Income sequence name',
-    ),
-  ).toThrow();
+    ).isLeft(),
+  ).toBe(true);
 });
 
 it("should throw if sequence's first step is not found", () => {
@@ -38,13 +38,13 @@ it("should throw if sequence's first step is not found", () => {
   const rememberCurrentStep = jest.fn();
   const createSequenceData = jest.fn();
 
-  expect(() =>
+  expect(
     initializeSequenceUsecase(sequences, stepsMap)(
       rememberCurrentStep,
       createSequenceData,
       'Income sequence name',
-    ),
-  ).toThrow();
+    ).isLeft(),
+  ).toBe(true);
 });
 
 it('should get first step of chosen sequence and remember as current', () => {
@@ -68,7 +68,7 @@ it('should get first step of chosen sequence and remember as current', () => {
     'Income sequence name',
   );
 
-  expect(stepInfo).toEqual({ id: stepId, label: stepLabel, choices: ['choice1'] });
+  expect(stepInfo.unwrap()).toEqual({ id: stepId, label: stepLabel, choices: ['choice1'] });
   expect(rememberCurrentStep).toHaveBeenCalledWith(just(stepId));
   expect(createSequenceData).toHaveBeenCalledWith(sequenceId);
 });

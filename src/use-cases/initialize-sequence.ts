@@ -1,3 +1,4 @@
+import { Either, left, right } from '@sweet-monads/either';
 import { just } from '@sweet-monads/maybe';
 
 import { SequenceWithFirstStepId, SequenceWithId, SequenceWithName } from '../core/data/sequence';
@@ -15,22 +16,26 @@ export const initializeSequenceUsecase =
     rememberCurrentStep: RememberCurrentStep,
     createSequenceData: CreateSequenceData,
     sequenceName: string,
-  ): StepUI => {
+  ): Either<Error, StepUI> => {
     const sequence = sequences.find(({ name }) => name === sequenceName);
 
-    if (!sequence) throw new Error(`${sequenceName} sequence is not found!`);
+    if (!sequence) return left(new Error(`${sequenceName} sequence is not found!`));
 
     const stepId = sequence.firstStepId;
-    const stepInfo = stepsMap.getBy(stepId).map((s) => ({
-      id: stepId,
-      label: s.label,
-      choices: s.staticChoices,
-    }));
 
-    if (stepInfo.isNone()) throw new Error(`Step ${stepId} is not found!`);
-
-    rememberCurrentStep(just(stepId));
-    createSequenceData(sequence.id);
-
-    return stepInfo.value;
+    return stepsMap
+      .getBy(stepId)
+      .map((s) => ({
+        id: stepId,
+        label: s.label,
+        choices: s.staticChoices,
+      }))
+      .map((stepInfo) => {
+        rememberCurrentStep(just(stepInfo.id));
+        createSequenceData(sequence.id);
+        return stepInfo;
+      })
+      .map((s) => right<Error, StepUI>(s))
+      .or(just(left(new Error(`Step ${stepId} is not found!`))))
+      .unwrap();
   };
