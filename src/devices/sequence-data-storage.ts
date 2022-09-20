@@ -1,5 +1,6 @@
-import { left, right } from '@sweet-monads/either';
 import { fromNullable } from '@sweet-monads/maybe';
+import * as E from 'fp-ts/Either';
+import { constUndefined } from 'fp-ts/lib/function';
 
 import { StoredSequence } from '../core/data/stored-sequence';
 import {
@@ -28,9 +29,9 @@ export const connectToSequenceDataStorage = (userId: string): SequenceDataStorag
   },
   saveStep: (id, value) => {
     const data = sequenceDataStorage.get(userId);
-    if (!data) return left(new Error("Can't find sequence to save"));
+    if (!data) return E.left(new Error("Can't find sequence to save"));
 
     sequenceDataStorage.set(userId, { ...data, steps: [...data.steps, { id, value }] });
-    return right(undefined);
+    return E.right(constUndefined());
   },
 });

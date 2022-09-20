@@ -1,4 +1,6 @@
 import { just } from '@sweet-monads/maybe';
+import * as E from 'fp-ts/Either';
+import { pipe } from 'fp-ts/function';
 
 import { configuration } from '../configuration';
 import { configureSequences } from '../core/configure-sequences';
@@ -108,14 +110,20 @@ export const botController = {
 
       const availableSequences = sequences.map((s) => s.name);
       if (availableSequences.includes(message)) {
-        return initializeSequence(rememberCurrentStep, createSequenceData, message)
-          .map((step) => [
-            {
-              markdownText: step.label,
-              choices: step.choices ?? [],
+        return pipe(
+          initializeSequence(rememberCurrentStep, createSequenceData, message),
+          E.fold(
+            (e) => {
+              throw e;
             },
-          ])
-          .unwrap();
+            (step) => [
+              {
+                markdownText: step.label,
+                choices: step.choices ?? [],
+              },
+            ],
+          ),
+        );
       }
 
       if (message === LABELS.cancel) {
@@ -145,16 +153,22 @@ export const botController = {
       }
 
       const handleEndOfSequence = () =>
-        presentSequenceData(getSequenceData)
-          .map((summary): Answer[] => [
-            {
-              markdownText: summary
-                .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
-                .join('\n'),
-              choices: [LABELS.submit, LABELS.cancel],
+        pipe(
+          presentSequenceData(getSequenceData),
+          E.fold(
+            (e) => {
+              throw e;
             },
-          ])
-          .unwrap();
+            (summary): Answer[] => [
+              {
+                markdownText: summary
+                  .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
+                  .join('\n'),
+                choices: [LABELS.submit, LABELS.cancel],
+              },
+            ],
+          ),
+        );
       const handleNewStep = (step: StepUI): Answer[] => [
         {
           markdownText: step.label,
@@ -162,15 +176,20 @@ export const botController = {
         },
       ];
 
-      return processStep(getCurrentStep, rememberCurrentStep, saveStep, message)
-        .map((nextStep) =>
-          nextStep
-            .map((s) => () => handleNewStep(s))
-            .or(just(handleEndOfSequence))
-            .apply(just(undefined)),
-        )
-        .unwrap()
-        .unwrap();
+      return pipe(
+        processStep(getCurrentStep, rememberCurrentStep, saveStep, message),
+        E.fold(
+          (e) => {
+            throw e;
+          },
+          (nextStep) =>
+            nextStep
+              .map((s) => () => handleNewStep(s))
+              .or(just(handleEndOfSequence))
+              .apply(just(undefined))
+              .unwrap(),
+        ),
+      );
     }),
   rememberUserChat: (userId: string, chatId: string) =>
     handleErrors(async () => {

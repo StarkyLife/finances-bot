@@ -1,5 +1,5 @@
-import { Either, left, right } from '@sweet-monads/either';
 import { just } from '@sweet-monads/maybe';
+import * as E from 'fp-ts/Either';
 
 import { SequenceWithFirstStepId, SequenceWithId, SequenceWithName } from '../core/data/sequence';
 import { StepUI, StepWithLabel, StepWithStaticChoices } from '../core/data/step';
@@ -16,10 +16,10 @@ export const initializeSequenceUsecase =
     rememberCurrentStep: RememberCurrentStep,
     createSequenceData: CreateSequenceData,
     sequenceName: string,
-  ): Either<Error, StepUI> => {
+  ): E.Either<Error, StepUI> => {
     const sequence = sequences.find(({ name }) => name === sequenceName);
 
-    if (!sequence) return left(new Error(`${sequenceName} sequence is not found!`));
+    if (!sequence) return E.left(new Error(`${sequenceName} sequence is not found!`));
 
     const stepId = sequence.firstStepId;
 
@@ -35,7 +35,7 @@ export const initializeSequenceUsecase =
         createSequenceData(sequence.id);
         return stepInfo;
       })
-      .map((s) => right<Error, StepUI>(s))
-      .or(just(left(new Error(`Step ${stepId} is not found!`))))
+      .map((s) => E.right<Error, StepUI>(s))
+      .or(just(E.left(new Error(`Step ${stepId} is not found!`))))
       .unwrap();
   };
