@@ -3,7 +3,6 @@ import { presentNewOrdersUsecase } from './present-new-orders';
 
 const createWBOrder = (order: Partial<WBOrder>): WBOrder => ({
   id: 'standardOrderId',
-  vendorCode: 'артикул',
   dateCreated: '2022-09-17T10:00:00+03:00',
   officeAddress: 'г Москва (Россия), Большой Казенный переулок, д. 10с2',
   currency: 'RUB',
@@ -28,7 +27,6 @@ it('should present only unknown new orders', async () => {
   expect(ordersPresentation).toEqual([
     {
       id: 'unknownOrderId',
-      vendorCode: 'артикул',
       dateCreated: '17.09.2022 10:00',
       officeAddress: 'г Москва (Россия), Большой Казенный переулок, д. 10с2',
       price: '1353.55 RUB',

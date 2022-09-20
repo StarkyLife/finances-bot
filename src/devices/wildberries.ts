@@ -26,7 +26,6 @@ export const connectToWildberries = (token: string): WildberriesSDK => {
 
       return response.data.orders.map((o) => ({
         id: o.orderId,
-        vendorCode: `${o.chrtId}`,
         dateCreated: o.dateCreated,
         officeAddress: o.officeAddress,
         currency: 'RUB',

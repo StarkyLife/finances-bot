@@ -12,7 +12,6 @@ describe('wildberries', () => {
       expect.arrayContaining([
         {
           currency: 'RUB',
-          vendorCode: expect.any(String),
           dateCreated: expect.any(String),
           id: expect.any(String),
           officeAddress: expect.any(String),
