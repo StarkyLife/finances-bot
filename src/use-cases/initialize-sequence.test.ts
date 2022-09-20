@@ -1,4 +1,5 @@
 import { just } from '@sweet-monads/maybe';
+import * as E from 'fp-ts/Either';
 
 import { createStepsMap } from '../core/create-steps-map';
 import { SequenceWithFirstStepId, SequenceWithId, SequenceWithName } from '../core/data/sequence';
@@ -18,11 +19,13 @@ it('should throw if sequence is not found', () => {
   const createSequenceData = jest.fn();
 
   expect(
-    initializeSequenceUsecase(sequences, stepsMap)(
-      rememberCurrentStep,
-      createSequenceData,
-      'Income sequence name',
-    ).isLeft(),
+    E.isLeft(
+      initializeSequenceUsecase(sequences, stepsMap)(
+        rememberCurrentStep,
+        createSequenceData,
+        'Income sequence name',
+      ),
+    ),
   ).toBe(true);
 });
 
@@ -39,11 +42,13 @@ it("should throw if sequence's first step is not found", () => {
   const createSequenceData = jest.fn();
 
   expect(
-    initializeSequenceUsecase(sequences, stepsMap)(
-      rememberCurrentStep,
-      createSequenceData,
-      'Income sequence name',
-    ).isLeft(),
+    E.isLeft(
+      initializeSequenceUsecase(sequences, stepsMap)(
+        rememberCurrentStep,
+        createSequenceData,
+        'Income sequence name',
+      ),
+    ),
   ).toBe(true);
 });
 
@@ -68,7 +73,11 @@ it('should get first step of chosen sequence and remember as current', () => {
     'Income sequence name',
   );
 
-  expect(stepInfo.unwrap()).toEqual({ id: stepId, label: stepLabel, choices: ['choice1'] });
+  expect(E.toUnion(stepInfo)).toEqual({
+    id: stepId,
+    label: stepLabel,
+    choices: ['choice1'],
+  });
   expect(rememberCurrentStep).toHaveBeenCalledWith(just(stepId));
   expect(createSequenceData).toHaveBeenCalledWith(sequenceId);
 });

@@ -1,5 +1,6 @@
-import { Either, left } from '@sweet-monads/either';
 import { just, Maybe } from '@sweet-monads/maybe';
+import * as E from 'fp-ts/Either';
+import { pipe } from 'fp-ts/lib/function';
 
 import { StepUI, StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
 import { StepsMap } from '../core/data/steps-map';
@@ -13,13 +14,15 @@ export const processStepUsecase =
     rememberCurrentStep: RememberCurrentStep,
     saveStep: SaveStep,
     stepValue: string,
-  ): Either<Error, Maybe<StepUI>> => {
+  ): E.Either<Error, Maybe<StepUI>> => {
     const createStepUI = (nextStepId: string) =>
-      stepsMap.getBy(nextStepId).map(({ label, staticChoices }) => ({
-        id: nextStepId,
-        label,
-        choices: staticChoices,
-      }));
+      stepsMap.getBy(nextStepId).map(
+        ({ label, staticChoices }): StepUI => ({
+          id: nextStepId,
+          label,
+          choices: staticChoices,
+        }),
+      );
 
     const getNextStep = (stepId: string) =>
       stepsMap
@@ -31,7 +34,7 @@ export const processStepUsecase =
         .chain(createStepUI);
 
     return getCurrentStep()
-      .map((stepId) => saveStep(stepId, stepValue).map(getNextStep.bind(null, stepId)))
-      .or(just(left(new Error('Current step is not found!'))))
+      .map((stepId) => pipe(saveStep(stepId, stepValue), E.map(getNextStep.bind(null, stepId))))
+      .or(just(E.left(new Error('Current step is not found!'))))
       .unwrap();
   };

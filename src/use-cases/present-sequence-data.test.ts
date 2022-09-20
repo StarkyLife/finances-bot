@@ -1,4 +1,5 @@
 import { just, none } from '@sweet-monads/maybe';
+import * as E from 'fp-ts/Either';
 
 import { createStepsMap } from '../core/create-steps-map';
 import { StepWithSummaryLabel } from '../core/data/step';
@@ -26,7 +27,7 @@ it('should present sequence data', () => {
 
   const sequencePresentation = presentSequenceDataUsecase(stepsMap)(getSequenceData);
 
-  expect(sequencePresentation.unwrap()).toEqual([
+  expect(E.toUnion(sequencePresentation)).toEqual([
     { id: 'type_id', label: 'Type', value: 'Income' },
     { id: 'price_id', label: 'Price', value: '100' },
   ]);
@@ -37,5 +38,5 @@ it('should throw if sequence data is not exist', () => {
 
   const getSequenceData = jest.fn().mockReturnValue(none());
 
-  expect(presentSequenceDataUsecase(stepsMap)(getSequenceData).isLeft()).toBe(true);
+  expect(E.isLeft(presentSequenceDataUsecase(stepsMap)(getSequenceData))).toBe(true);
 });
