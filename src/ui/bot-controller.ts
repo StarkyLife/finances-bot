@@ -208,7 +208,6 @@ export const botController = {
                 chatId.value,
                 [
                   `*Номер заказа* - ${order.id}`,
-                  `*Артикул* - ${order.vendorCode}`,
                   `*Дата создания* - ${order.dateCreated}`,
                   `*Пункт назначения* - ${order.officeAddress}`,
                   `*Цена* - ${order.price}`,
