@@ -1487,6 +1487,32 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@sweet-monads/either@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@sweet-monads/either/-/either-3.1.0.tgz#802667779112300329564e201e2222102085dc02"
+  integrity sha512-GiKUqzwj2602FCJo+sFMYyuo8OS1rmknSLRSJmjvnKqkyo+OXEqAhw9tAASH/SvCC7OC7IEEUvarocWMuB9pdg==
+  dependencies:
+    "@sweet-monads/interfaces" "^3.1.0"
+
+"@sweet-monads/interfaces@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@sweet-monads/interfaces/-/interfaces-3.1.0.tgz#49cdd0a697ad025ce05201b0eb495d86a007ed51"
+  integrity sha512-/65uh95U8yWmnVQVQWPh6v49vTDomXYttDJot86JOpWjP2gpStnPX02uTH/WMla0vfGb5KP7mFZMKUvom/QqkA==
+
+"@sweet-monads/iterator@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@sweet-monads/iterator/-/iterator-3.1.0.tgz#1256127be389964c9de8c6764a171e0890058bb4"
+  integrity sha512-oxFJwbVqT+xGBxNdh8Snr/XFF4G1nPDmZUHIiURTx/9flsTS55oja/Y2l2poNWngHZFE1Ai9wQTcbgoyCCyhbw==
+  dependencies:
+    "@sweet-monads/maybe" "^3.1.0"
+
+"@sweet-monads/maybe@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@sweet-monads/maybe/-/maybe-3.1.0.tgz#c1a64feeaa773bf9e4f40d4add7d40c30f1fa446"
+  integrity sha512-Gsq7bY0CWHjKCErWuCruBaqnRAHYDe5Ae2xgFevHM7CJmDA+dBD3s9ChMZs5DPT8hjyFOQgO5BPU/VhnkjqV0Q==
+  dependencies:
+    "@sweet-monads/interfaces" "^3.1.0"
+
 "@types/babel__core@^7.1.14":
   version "7.1.19"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.19.tgz#7b497495b7d1b4812bdb9d02804d0576f43ee460"

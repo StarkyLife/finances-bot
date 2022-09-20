@@ -1,5 +1,8 @@
+import { just } from '@sweet-monads/maybe';
+
 import { configuration } from '../configuration';
 import { configureSequences } from '../core/configure-sequences';
+import { StepUI } from '../core/data/step';
 import { connectToChatsStorage } from '../devices/chatsStorage';
 import { connectToCurrentStepStorage } from '../devices/current-step-storage';
 import { connectToGoogleSheet } from '../devices/google-sheet';
@@ -105,14 +108,14 @@ export const botController = {
 
       const availableSequences = sequences.map((s) => s.name);
       if (availableSequences.includes(message)) {
-        const step = initializeSequence(rememberCurrentStep, createSequenceData, message);
-
-        return [
-          {
-            markdownText: step.label,
-            choices: step.choices ?? [],
-          },
-        ];
+        return initializeSequence(rememberCurrentStep, createSequenceData, message)
+          .map((step) => [
+            {
+              markdownText: step.label,
+              choices: step.choices ?? [],
+            },
+          ])
+          .unwrap();
       }
 
       if (message === LABELS.cancel) {
@@ -141,26 +144,33 @@ export const botController = {
         ];
       }
 
-      const nextStep = processStep(getCurrentStep, rememberCurrentStep, saveStep, message);
+      const handleEndOfSequence = () =>
+        presentSequenceData(getSequenceData)
+          .map((summary): Answer[] => [
+            {
+              markdownText: summary
+                .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
+                .join('\n'),
+              choices: [LABELS.submit, LABELS.cancel],
+            },
+          ])
+          .unwrap();
+      const handleNewStep = (step: StepUI): Answer[] => [
+        {
+          markdownText: step.label,
+          choices: step.choices ?? [],
+        },
+      ];
 
-      if (nextStep) {
-        return [
-          {
-            markdownText: nextStep.label,
-            choices: nextStep.choices ?? [],
-          },
-        ];
-      } else {
-        const summary = presentSequenceData(getSequenceData);
-        return [
-          {
-            markdownText: summary
-              .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
-              .join('\n'),
-            choices: [LABELS.submit, LABELS.cancel],
-          },
-        ];
-      }
+      return processStep(getCurrentStep, rememberCurrentStep, saveStep, message)
+        .map((nextStep) =>
+          nextStep
+            .map((s) => () => handleNewStep(s))
+            .or(just(handleEndOfSequence))
+            .apply(just(undefined)),
+        )
+        .unwrap()
+        .unwrap();
     }),
   rememberUserChat: (userId: string, chatId: string) =>
     handleErrors(async () => {
@@ -181,7 +191,7 @@ export const botController = {
           const chatsStorage = connectToChatsStorage(user.id);
 
           const chatId = chatsStorage.getChat();
-          if (!chatId) return;
+          if (chatId.isNone()) return;
 
           const wildberriesSDK = connectToWildberries(user.wildberriesToken);
           const ordersCache = connectToOrdersCache(user.id);
@@ -195,9 +205,10 @@ export const botController = {
             const orders = await presentNewOrders();
             for (const order of orders) {
               await messageSender(
-                chatId,
+                chatId.value,
                 [
                   `*Номер заказа* - ${order.id}`,
+                  `*Артикул* - ${order.vendorCode}`,
                   `*Дата создания* - ${order.dateCreated}`,
                   `*Пункт назначения* - ${order.officeAddress}`,
                   `*Цена* - ${order.price}`,

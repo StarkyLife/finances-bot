@@ -1,19 +1,22 @@
+import { Either, left, right } from '@sweet-monads/either';
+import LazyIterator from '@sweet-monads/iterator';
+import { just } from '@sweet-monads/maybe';
+
 import { StepWithSummaryLabel } from '../core/data/step';
-import { checkExistence } from '../utils/filters';
+import { StepsMap } from '../core/data/steps-map';
+import { StoredStep } from '../core/data/stored-sequence';
+import { SummaryItem } from '../core/data/summary-item';
 import { GetSequenceData } from './dependencies/sequence-data';
 
 export const presentSequenceDataUsecase =
-  (stepsMap: Map<string, StepWithSummaryLabel>) => (getSequenceData: GetSequenceData) => {
-    const data = getSequenceData();
+  (stepsMap: StepsMap<StepWithSummaryLabel>) =>
+  (getSequenceData: GetSequenceData): Either<Error, SummaryItem[]> => {
+    const createSummaryItem = ({ id, value }: StoredStep) =>
+      stepsMap.getBy(id).map((s) => ({ id, label: s.summaryLabel, value }));
 
-    if (!data?.steps.length) throw new Error('No data to present!');
-
-    return data.steps
-      .map(({ id, value }) => {
-        const step = stepsMap.get(id);
-        if (!step) return undefined;
-
-        return { id, label: step.summaryLabel, value };
-      })
-      .filter(checkExistence);
+    return getSequenceData()
+      .map((data) => LazyIterator.from(data.steps).filterMap(createSummaryItem))
+      .map((summary) => right<Error, SummaryItem[]>(Array.from(summary.collect())))
+      .or(just(left(new Error('No data to present!'))))
+      .unwrap();
   };

@@ -1,4 +1,6 @@
-export type StepWithNext = { next: string | undefined };
+import { Maybe } from '@sweet-monads/maybe';
+
+export type StepWithNext = { next: Maybe<string> };
 export type StepWithLabel = { label: string };
 export type StepWithSummaryLabel = { summaryLabel: string };
 export type StepWithStaticChoices = { staticChoices?: string[] };

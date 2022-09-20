@@ -1,3 +1,5 @@
+import { just } from '@sweet-monads/maybe';
+
 import { configuration } from '../configuration';
 import { SheetInfo } from '../core/data/sheet';
 import { connectToGoogleSheet } from './google-sheet';
@@ -9,6 +11,8 @@ it('should append data', async () => {
   };
 
   await expect(
-    connectToGoogleSheet(configuration.google).append(sheetInfo, [['Hello', 'my friend']]),
+    connectToGoogleSheet(configuration.google).append(sheetInfo, [
+      [just('Hello'), just('my friend')],
+    ]),
   ).resolves.toBeUndefined();
 });

@@ -20,6 +20,7 @@ export const presentNewOrdersUsecase =
 
     return unknownOrders.map((o) => ({
       id: o.id,
+      vendorCode: o.vendorCode,
       dateCreated: formatInTimeZone(new Date(o.dateCreated), 'Europe/Moscow', 'dd.MM.yyyy HH:mm'),
       officeAddress: o.officeAddress,
       price: `${o.price / 100} ${o.currency}`,

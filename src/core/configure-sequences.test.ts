@@ -1,3 +1,5 @@
+import { just, none } from '@sweet-monads/maybe';
+
 import { configureSequences } from './configure-sequences';
 import { SequenceDescription } from './data/sequence-description';
 import { Step } from './data/step';
@@ -81,12 +83,12 @@ it('should construct steps map', () => {
 
   const { stepsMap } = configureSequences(sequencesDescriptions);
 
-  expect(stepsMap).toEqual(
+  expect(stepsMap.internalData).toEqual(
     new Map<string, Step>([
       [
         'sequenceId_stepId',
         {
-          next: 'sequenceId_nextStepId',
+          next: just('sequenceId_nextStepId'),
           label: 'stepLabel',
           summaryLabel: 'stepSummary',
           staticChoices: ['choice1'],
@@ -96,7 +98,7 @@ it('should construct steps map', () => {
       [
         'sequenceId_nextStepId',
         {
-          next: undefined,
+          next: none(),
           label: 'nextStepLabel',
           summaryLabel: 'nextStepSummary',
         },

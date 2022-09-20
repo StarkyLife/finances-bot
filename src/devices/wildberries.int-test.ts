@@ -1,7 +1,7 @@
 import { configuration } from '../configuration';
 import { connectToWildberries } from './wildberries';
 
-describe.skip('wildberries', () => {
+describe('wildberries', () => {
   it('should be able to get orders', async () => {
     const token = configuration.wildberriesToken;
     const wildberriesSDK = connectToWildberries(token);
@@ -12,6 +12,7 @@ describe.skip('wildberries', () => {
       expect.arrayContaining([
         {
           currency: 'RUB',
+          vendorCode: expect.any(String),
           dateCreated: expect.any(String),
           id: expect.any(String),
           officeAddress: expect.any(String),

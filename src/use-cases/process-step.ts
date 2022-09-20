@@ -1,30 +1,37 @@
+import { Either, left } from '@sweet-monads/either';
+import { just, Maybe } from '@sweet-monads/maybe';
+
 import { StepUI, StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
+import { StepsMap } from '../core/data/steps-map';
 import { GetCurrentStep, RememberCurrentStep } from './dependencies/current-step';
 import { SaveStep } from './dependencies/sequence-data';
 
 export const processStepUsecase =
-  (stepsMap: Map<string, StepWithNext & StepWithLabel & StepWithStaticChoices>) =>
+  (stepsMap: StepsMap<StepWithNext & StepWithLabel & StepWithStaticChoices>) =>
   (
     getCurrentStep: GetCurrentStep,
     rememberCurrentStep: RememberCurrentStep,
     saveStep: SaveStep,
     stepValue: string,
-  ): StepUI | undefined => {
-    const stepId = getCurrentStep();
-    if (!stepId) throw new Error('Current step is not found!');
+  ): Either<Error, Maybe<StepUI>> => {
+    const createStepUI = (nextStepId: string) =>
+      stepsMap.getBy(nextStepId).map(({ label, staticChoices }) => ({
+        id: nextStepId,
+        label,
+        choices: staticChoices,
+      }));
 
-    saveStep(stepId, stepValue);
+    const getNextStep = (stepId: string) =>
+      stepsMap
+        .getBy(stepId)
+        .chain((s) => {
+          rememberCurrentStep(s.next);
+          return s.next;
+        })
+        .chain(createStepUI);
 
-    const nextStepId = stepsMap.get(stepId)?.next;
-    const nextStep = nextStepId && stepsMap.get(nextStepId);
-
-    rememberCurrentStep(nextStepId);
-
-    return nextStep
-      ? {
-          id: nextStepId,
-          label: nextStep.label,
-          choices: nextStep.staticChoices,
-        }
-      : undefined;
+    return getCurrentStep()
+      .map((stepId) => saveStep(stepId, stepValue).map(getNextStep.bind(null, stepId)))
+      .or(just(left(new Error('Current step is not found!'))))
+      .unwrap();
   };

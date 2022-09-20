@@ -1,5 +1,6 @@
 export type WBOrder = {
   id: string;
+  vendorCode: string;
   dateCreated: string;
   officeAddress: string;
   currency: string;
@@ -8,6 +9,7 @@ export type WBOrder = {
 
 export type OrderPresentation = {
   id: string;
+  vendorCode: string;
   dateCreated: string;
   officeAddress: string;
   price: string;

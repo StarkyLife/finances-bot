@@ -1,13 +1,16 @@
+import { fromNullable } from '@sweet-monads/maybe';
+
+import { createStepsMap, RealStepsMap } from './create-steps-map';
 import { Sequence } from './data/sequence';
 import { SequenceDescription } from './data/sequence-description';
 import { Step } from './data/step';
 
 export const configureSequences = (
   descriptions: SequenceDescription[],
-): { sequences: Sequence[]; stepsMap: Map<string, Step> } => {
+): { sequences: Sequence[]; stepsMap: RealStepsMap<Step> } => {
   if (!descriptions.length) throw new Error('No sequences!');
 
-  const stepsMap = new Map<string, Step>();
+  const stepsMapData = new Map<string, Step>();
 
   const sequences = descriptions.map((sequenceDescription) => {
     if (!sequenceDescription.steps.length)
@@ -20,7 +23,8 @@ export const configureSequences = (
 
     stepsWithModifiedId.reduceRight(
       (prevStepId: string | undefined, current) =>
-        stepsMap.set(current.id, { ...current.config, next: prevStepId }) && current.id,
+        stepsMapData.set(current.id, { ...current.config, next: fromNullable(prevStepId) }) &&
+        current.id,
       undefined,
     );
 
@@ -31,5 +35,5 @@ export const configureSequences = (
     };
   });
 
-  return { sequences, stepsMap };
+  return { sequences, stepsMap: createStepsMap(stepsMapData) };
 };

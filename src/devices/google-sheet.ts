@@ -24,7 +24,7 @@ export const connectToGoogleSheet = (config: GoogleConfig): GoogleSheet => {
         spreadsheetId: sheetInfo.id,
         range: sheetInfo.range,
         valueInputOption: 'USER_ENTERED',
-        requestBody: { values },
+        requestBody: { values: values.map((row) => row.map((cell) => cell.value)) },
       });
     },
   };

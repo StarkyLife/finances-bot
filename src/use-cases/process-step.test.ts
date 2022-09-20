@@ -1,28 +1,37 @@
+import { right } from '@sweet-monads/either';
+import { just, none } from '@sweet-monads/maybe';
+
+import { createStepsMap } from '../core/create-steps-map';
 import { StepWithLabel, StepWithNext, StepWithStaticChoices } from '../core/data/step';
 import { processStepUsecase } from './process-step';
 
-const createStepsMap = (
+const createTestStepsMap = (
   data: Array<[string, StepWithNext & StepWithLabel & StepWithStaticChoices]>,
-) => new Map(data);
+) => createStepsMap(new Map(data));
 
 it('should fail if current step is not found', () => {
-  const stepsMap = createStepsMap([]);
+  const stepsMap = createTestStepsMap([]);
   const stepValue = 'step data';
-  const saveStep = jest.fn();
-  const getCurrentStep = jest.fn().mockReturnValue(undefined);
+  const saveStep = jest.fn().mockReturnValue(right(undefined));
+  const getCurrentStep = jest.fn().mockReturnValue(none());
   const rememberCurrentStep = jest.fn();
 
-  expect(() =>
-    processStepUsecase(stepsMap)(getCurrentStep, rememberCurrentStep, saveStep, stepValue),
-  ).toThrow();
+  const nextStepInfo = processStepUsecase(stepsMap)(
+    getCurrentStep,
+    rememberCurrentStep,
+    saveStep,
+    stepValue,
+  );
+
+  expect(nextStepInfo.isLeft()).toBe(true);
 });
 
 it('should save step data', () => {
   const currentStepId = 'step id';
-  const stepsMap = createStepsMap([[currentStepId, { label: 'step label', next: undefined }]]);
+  const stepsMap = createTestStepsMap([[currentStepId, { label: 'step label', next: none() }]]);
   const stepValue = 'step data';
-  const saveStep = jest.fn();
-  const getCurrentStep = jest.fn().mockReturnValue(currentStepId);
+  const saveStep = jest.fn().mockReturnValue(right(undefined));
+  const getCurrentStep = jest.fn().mockReturnValue(just(currentStepId));
   const rememberCurrentStep = jest.fn();
 
   processStepUsecase(stepsMap)(getCurrentStep, rememberCurrentStep, saveStep, stepValue);
@@ -33,12 +42,12 @@ it('should save step data', () => {
 it('should inform about next step and remember it', () => {
   const currentStepId = 'first step id';
   const nextStepId = 'second step id';
-  const stepsMap = createStepsMap([
-    [currentStepId, { label: 'first label', next: nextStepId }],
-    [nextStepId, { label: 'second label', staticChoices: ['choice1'], next: undefined }],
+  const stepsMap = createTestStepsMap([
+    [currentStepId, { label: 'first label', next: just(nextStepId) }],
+    [nextStepId, { label: 'second label', staticChoices: ['choice1'], next: none() }],
   ]);
-  const saveStep = jest.fn();
-  const getCurrentStep = jest.fn().mockReturnValue(currentStepId);
+  const saveStep = jest.fn().mockReturnValue(right(undefined));
+  const getCurrentStep = jest.fn().mockReturnValue(just(currentStepId));
   const rememberCurrentStep = jest.fn();
 
   const nextStepInfo = processStepUsecase(stepsMap)(
@@ -48,19 +57,19 @@ it('should inform about next step and remember it', () => {
     'step data',
   );
 
-  expect(nextStepInfo).toEqual({
+  expect(nextStepInfo.unwrap().unwrap()).toEqual({
     id: nextStepId,
     label: 'second label',
     choices: ['choice1'],
   });
-  expect(rememberCurrentStep).toHaveBeenCalledWith(nextStepId);
+  expect(rememberCurrentStep).toHaveBeenCalledWith(just(nextStepId));
 });
 
 it('should inform about end of sequence and remember it', () => {
   const currentStepId = 'step id';
-  const stepsMap = createStepsMap([[currentStepId, { label: 'step label', next: undefined }]]);
-  const saveStep = jest.fn();
-  const getCurrentStep = jest.fn().mockReturnValue(currentStepId);
+  const stepsMap = createTestStepsMap([[currentStepId, { label: 'step label', next: none() }]]);
+  const saveStep = jest.fn().mockReturnValue(right(undefined));
+  const getCurrentStep = jest.fn().mockReturnValue(just(currentStepId));
   const rememberCurrentStep = jest.fn();
 
   const nextStepInfo = processStepUsecase(stepsMap)(
@@ -70,6 +79,6 @@ it('should inform about end of sequence and remember it', () => {
     'step data',
   );
 
-  expect(nextStepInfo).toBeUndefined();
-  expect(rememberCurrentStep).toHaveBeenCalledWith(undefined);
+  expect(nextStepInfo.unwrap().isNone()).toBe(true);
+  expect(rememberCurrentStep).toHaveBeenCalledWith(none());
 });
