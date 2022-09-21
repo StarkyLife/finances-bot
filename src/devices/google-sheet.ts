@@ -1,3 +1,4 @@
+import * as O from 'fp-ts/Option';
 import { google } from 'googleapis';
 
 import { SaveInGoogleSheet } from '../use-cases/dependencies/google-sheet';
@@ -24,7 +25,7 @@ export const connectToGoogleSheet = (config: GoogleConfig): GoogleSheet => {
         spreadsheetId: sheetInfo.id,
         range: sheetInfo.range,
         valueInputOption: 'USER_ENTERED',
-        requestBody: { values: values.map((row) => row.map((cell) => cell.value)) },
+        requestBody: { values: values.map((row) => row.map((cell) => O.toUndefined(cell))) },
       });
     },
   };

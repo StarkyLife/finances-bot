@@ -1,9 +1,9 @@
-import { Maybe } from '@sweet-monads/maybe';
+import * as O from 'fp-ts/Option';
 
 import { SheetInfo } from '../../core/data/sheet';
 
-export type GetSheetInfo = (sequenceId: string) => Maybe<SheetInfo>;
+export type GetSheetInfo = (sequenceId: string) => O.Option<SheetInfo>;
 export type SaveInGoogleSheet = (
   sheetInfo: SheetInfo,
-  data: Array<Array<Maybe<string>>>,
+  data: Array<Array<O.Option<string>>>,
 ) => Promise<void>;

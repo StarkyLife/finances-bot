@@ -1,4 +1,4 @@
-import { Maybe } from '@sweet-monads/maybe';
+import * as O from 'fp-ts/Option';
 
-export type RememberCurrentStep = (stepId: Maybe<string>) => void;
-export type GetCurrentStep = () => Maybe<string>;
+export type RememberCurrentStep = (stepId: O.Option<string>) => void;
+export type GetCurrentStep = () => O.Option<string>;

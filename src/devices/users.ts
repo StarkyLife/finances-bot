@@ -1,4 +1,4 @@
-import { just, none } from '@sweet-monads/maybe';
+import * as O from 'fp-ts/Option';
 
 import { GetSheetInfo } from '../use-cases/dependencies/google-sheet';
 import { User } from './data/user';
@@ -22,7 +22,7 @@ export const createUserGateway = (users: User[]): UserGateway => ({
     return (sequenceId) => {
       const sheetInfo = user?.sheetInfos.find((i) => i.sequenceId === sequenceId);
 
-      return sheetInfo ? just({ id: sheetInfo.sheetId, range: sheetInfo.range }) : none();
+      return sheetInfo ? O.some({ id: sheetInfo.sheetId, range: sheetInfo.range }) : O.none;
     };
   },
 });

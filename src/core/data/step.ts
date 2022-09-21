@@ -1,6 +1,6 @@
-import { Maybe } from '@sweet-monads/maybe';
+import * as O from 'fp-ts/Option';
 
-export type StepWithNext = { next: Maybe<string> };
+export type StepWithNext = { next: O.Option<string> };
 export type StepWithLabel = { label: string };
 export type StepWithSummaryLabel = { summaryLabel: string };
 export type StepWithStaticChoices = { staticChoices?: string[] };

@@ -1,4 +1,4 @@
-import { just } from '@sweet-monads/maybe';
+import * as O from 'fp-ts/Option';
 
 import { configuration } from '../configuration';
 import { SheetInfo } from '../core/data/sheet';
@@ -12,7 +12,7 @@ it('should append data', async () => {
 
   await expect(
     connectToGoogleSheet(configuration.google).append(sheetInfo, [
-      [just('Hello'), just('my friend')],
+      [O.some('Hello'), O.some('my friend')],
     ]),
   ).resolves.toBeUndefined();
 });

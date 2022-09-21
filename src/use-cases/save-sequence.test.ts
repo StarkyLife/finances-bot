@@ -1,4 +1,4 @@
-import { just, none } from '@sweet-monads/maybe';
+import * as O from 'fp-ts/Option';
 
 import { createStepsMap } from '../core/create-steps-map';
 import { SheetInfo } from '../core/data/sheet';
@@ -23,8 +23,8 @@ it('should save data in google sheet and clear', async () => {
     ['transform_step_id', { transformer: (value) => value + ' transformed' }],
   ]);
 
-  const getSequenceData = jest.fn().mockReturnValue(just(sequenceData));
-  const getSheetInfo = jest.fn().mockReturnValue(just(sheetInfo));
+  const getSequenceData = jest.fn().mockReturnValue(O.some(sequenceData));
+  const getSheetInfo = jest.fn().mockReturnValue(O.some(sheetInfo));
   const saveInGoogleSheet = jest.fn();
   const clearSequenceData = jest.fn();
 
@@ -36,7 +36,7 @@ it('should save data in google sheet and clear', async () => {
   });
 
   expect(saveInGoogleSheet).toHaveBeenCalledWith(sheetInfo, [
-    [just('Income'), just('Value transformed'), none()],
+    [O.some('Income'), O.some('Value transformed'), O.none],
   ]);
   expect(clearSequenceData).toHaveBeenCalled();
 });
@@ -44,7 +44,7 @@ it('should save data in google sheet and clear', async () => {
 it('should throw if sequence data is not exist', async () => {
   const stepsMap = createTestStepsMap([]);
 
-  const getSequenceData = jest.fn().mockReturnValue(none());
+  const getSequenceData = jest.fn().mockReturnValue(O.none);
   const getSheetInfo = jest.fn();
   const saveInGoogleSheet = jest.fn();
   const clearSequenceData = jest.fn();
@@ -66,8 +66,8 @@ it('should throw if sheet id is not found', async () => {
     steps: [{ id: 'type_id', value: 'Income' }],
   };
 
-  const getSequenceData = jest.fn().mockReturnValue(just(sequenceData));
-  const getSheetInfo = jest.fn().mockReturnValue(none());
+  const getSequenceData = jest.fn().mockReturnValue(O.some(sequenceData));
+  const getSheetInfo = jest.fn().mockReturnValue(O.none);
   const saveInGoogleSheet = jest.fn();
   const clearSequenceData = jest.fn();
 

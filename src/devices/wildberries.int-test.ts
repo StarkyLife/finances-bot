@@ -1,7 +1,7 @@
 import { configuration } from '../configuration';
 import { connectToWildberries } from './wildberries';
 
-describe('wildberries', () => {
+describe.skip('wildberries', () => {
   it('should be able to get orders', async () => {
     const token = configuration.wildberriesToken;
     const wildberriesSDK = connectToWildberries(token);

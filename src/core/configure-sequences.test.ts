@@ -1,4 +1,4 @@
-import { just, none } from '@sweet-monads/maybe';
+import * as O from 'fp-ts/Option';
 
 import { configureSequences } from './configure-sequences';
 import { SequenceDescription } from './data/sequence-description';
@@ -88,7 +88,7 @@ it('should construct steps map', () => {
       [
         'sequenceId_stepId',
         {
-          next: just('sequenceId_nextStepId'),
+          next: O.some('sequenceId_nextStepId'),
           label: 'stepLabel',
           summaryLabel: 'stepSummary',
           staticChoices: ['choice1'],
@@ -98,7 +98,7 @@ it('should construct steps map', () => {
       [
         'sequenceId_nextStepId',
         {
-          next: none(),
+          next: O.none,
           label: 'nextStepLabel',
           summaryLabel: 'nextStepSummary',
         },
