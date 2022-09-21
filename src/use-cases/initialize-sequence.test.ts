@@ -1,5 +1,5 @@
-import { just } from '@sweet-monads/maybe';
 import * as E from 'fp-ts/Either';
+import * as O from 'fp-ts/Option';
 
 import { createStepsMap } from '../core/create-steps-map';
 import { SequenceWithFirstStepId, SequenceWithId, SequenceWithName } from '../core/data/sequence';
@@ -78,6 +78,6 @@ it('should get first step of chosen sequence and remember as current', () => {
     label: stepLabel,
     choices: ['choice1'],
   });
-  expect(rememberCurrentStep).toHaveBeenCalledWith(just(stepId));
+  expect(rememberCurrentStep).toHaveBeenCalledWith(O.some(stepId));
   expect(createSequenceData).toHaveBeenCalledWith(sequenceId);
 });

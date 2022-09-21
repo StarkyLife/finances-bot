@@ -1,4 +1,4 @@
-import { fromNullable } from '@sweet-monads/maybe';
+import * as O from 'fp-ts/Option';
 
 import { createStepsMap, RealStepsMap } from './create-steps-map';
 import { Sequence } from './data/sequence';
@@ -23,7 +23,7 @@ export const configureSequences = (
 
     stepsWithModifiedId.reduceRight(
       (prevStepId: string | undefined, current) =>
-        stepsMapData.set(current.id, { ...current.config, next: fromNullable(prevStepId) }) &&
+        stepsMapData.set(current.id, { ...current.config, next: O.fromNullable(prevStepId) }) &&
         current.id,
       undefined,
     );

@@ -1,4 +1,4 @@
-import { none } from '@sweet-monads/maybe';
+import * as O from 'fp-ts/Option';
 
 import { RememberCurrentStep } from './dependencies/current-step';
 import { ClearSequenceData } from './dependencies/sequence-data';
@@ -8,5 +8,5 @@ export const cancelSequenceUsecase = (
   rememberCurrentStep: RememberCurrentStep,
 ): void => {
   clearSequenceData();
-  rememberCurrentStep(none());
+  rememberCurrentStep(O.none);
 };

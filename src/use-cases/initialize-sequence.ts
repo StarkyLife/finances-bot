@@ -1,5 +1,6 @@
-import { just } from '@sweet-monads/maybe';
 import * as E from 'fp-ts/Either';
+import { pipe } from 'fp-ts/lib/function';
+import * as O from 'fp-ts/Option';
 
 import { SequenceWithFirstStepId, SequenceWithId, SequenceWithName } from '../core/data/sequence';
 import { StepUI, StepWithLabel, StepWithStaticChoices } from '../core/data/step';
@@ -16,26 +17,24 @@ export const initializeSequenceUsecase =
     rememberCurrentStep: RememberCurrentStep,
     createSequenceData: CreateSequenceData,
     sequenceName: string,
-  ): E.Either<Error, StepUI> => {
-    const sequence = sequences.find(({ name }) => name === sequenceName);
-
-    if (!sequence) return E.left(new Error(`${sequenceName} sequence is not found!`));
-
-    const stepId = sequence.firstStepId;
-
-    return stepsMap
-      .getBy(stepId)
-      .map((s) => ({
-        id: stepId,
-        label: s.label,
-        choices: s.staticChoices,
-      }))
-      .map((stepInfo) => {
-        rememberCurrentStep(just(stepInfo.id));
-        createSequenceData(sequence.id);
-        return stepInfo;
-      })
-      .map((s) => E.right<Error, StepUI>(s))
-      .or(just(E.left(new Error(`Step ${stepId} is not found!`))))
-      .unwrap();
-  };
+  ): E.Either<Error, StepUI> =>
+    pipe(
+      sequences.find(({ name }) => name === sequenceName),
+      E.fromNullable(new Error(`${sequenceName} sequence is not found!`)),
+      E.chain((sequence) =>
+        pipe(
+          stepsMap.getBy(sequence.firstStepId),
+          E.fromOption(() => new Error(`Step ${sequence.firstStepId} is not found!`)),
+          E.map((s) => ({
+            id: sequence.firstStepId,
+            label: s.label,
+            choices: s.staticChoices,
+          })),
+          E.map((stepInfo) => {
+            rememberCurrentStep(O.some(stepInfo.id));
+            createSequenceData(sequence.id);
+            return stepInfo;
+          }),
+        ),
+      ),
+    );

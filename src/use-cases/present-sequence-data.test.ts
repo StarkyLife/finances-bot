@@ -1,5 +1,5 @@
-import { just, none } from '@sweet-monads/maybe';
 import * as E from 'fp-ts/Either';
+import * as O from 'fp-ts/Option';
 
 import { createStepsMap } from '../core/create-steps-map';
 import { StepWithSummaryLabel } from '../core/data/step';
@@ -15,7 +15,7 @@ it('should present sequence data', () => {
   ]);
 
   const getSequenceData = jest.fn().mockReturnValue(
-    just({
+    O.some({
       id: 'sequenceId',
       steps: [
         { id: 'type_id', value: 'Income' },
@@ -36,7 +36,7 @@ it('should present sequence data', () => {
 it('should throw if sequence data is not exist', () => {
   const stepsMap = createTestStepsMap([]);
 
-  const getSequenceData = jest.fn().mockReturnValue(none());
+  const getSequenceData = jest.fn().mockReturnValue(O.none);
 
   expect(E.isLeft(presentSequenceDataUsecase(stepsMap)(getSequenceData))).toBe(true);
 });

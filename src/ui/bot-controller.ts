@@ -1,10 +1,9 @@
-import { just } from '@sweet-monads/maybe';
 import * as E from 'fp-ts/Either';
-import { pipe } from 'fp-ts/function';
+import { identity, pipe } from 'fp-ts/function';
+import * as O from 'fp-ts/Option';
 
 import { configuration } from '../configuration';
 import { configureSequences } from '../core/configure-sequences';
-import { StepUI } from '../core/data/step';
 import { connectToChatsStorage } from '../devices/chatsStorage';
 import { connectToCurrentStepStorage } from '../devices/current-step-storage';
 import { connectToGoogleSheet } from '../devices/google-sheet';
@@ -155,40 +154,34 @@ export const botController = {
       const handleEndOfSequence = () =>
         pipe(
           presentSequenceData(getSequenceData),
-          E.fold(
-            (e) => {
-              throw e;
+          E.map((summary): Answer[] => [
+            {
+              markdownText: summary
+                .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
+                .join('\n'),
+              choices: [LABELS.submit, LABELS.cancel],
             },
-            (summary): Answer[] => [
-              {
-                markdownText: summary
-                  .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
-                  .join('\n'),
-                choices: [LABELS.submit, LABELS.cancel],
-              },
-            ],
-          ),
+          ]),
         );
-      const handleNewStep = (step: StepUI): Answer[] => [
-        {
-          markdownText: step.label,
-          choices: step.choices ?? [],
-        },
-      ];
 
       return pipe(
         processStep(getCurrentStep, rememberCurrentStep, saveStep, message),
-        E.fold(
-          (e) => {
-            throw e;
-          },
-          (nextStep) =>
-            nextStep
-              .map((s) => () => handleNewStep(s))
-              .or(just(handleEndOfSequence))
-              .apply(just(undefined))
-              .unwrap(),
+        E.chain((nextStep) =>
+          pipe(
+            nextStep,
+            O.fold(handleEndOfSequence, (step) =>
+              E.of([
+                {
+                  markdownText: step.label,
+                  choices: step.choices ?? [],
+                },
+              ]),
+            ),
+          ),
         ),
+        E.fold((e) => {
+          throw e;
+        }, identity),
       );
     }),
   rememberUserChat: (userId: string, chatId: string) =>
@@ -210,7 +203,7 @@ export const botController = {
           const chatsStorage = connectToChatsStorage(user.id);
 
           const chatId = chatsStorage.getChat();
-          if (chatId.isNone()) return;
+          if (O.isNone(chatId)) return;
 
           const wildberriesSDK = connectToWildberries(user.wildberriesToken);
           const ordersCache = connectToOrdersCache(user.id);

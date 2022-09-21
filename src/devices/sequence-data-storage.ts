@@ -1,6 +1,6 @@
-import { fromNullable } from '@sweet-monads/maybe';
 import * as E from 'fp-ts/Either';
 import { constUndefined } from 'fp-ts/lib/function';
+import * as O from 'fp-ts/Option';
 
 import { StoredSequence } from '../core/data/stored-sequence';
 import {
@@ -23,7 +23,7 @@ export const connectToSequenceDataStorage = (userId: string): SequenceDataStorag
   createSequenceData: (sequenceId) => {
     sequenceDataStorage.set(userId, { id: sequenceId, steps: [] });
   },
-  getSequenceData: () => fromNullable(sequenceDataStorage.get(userId)),
+  getSequenceData: () => O.fromNullable(sequenceDataStorage.get(userId)),
   clearSequenceData: () => {
     sequenceDataStorage.delete(userId);
   },
