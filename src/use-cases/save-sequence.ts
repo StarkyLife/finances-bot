@@ -1,7 +1,8 @@
 import * as A from 'fp-ts/Array';
 import * as E from 'fp-ts/Either';
-import { identity, pipe } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/Option';
+import * as TE from 'fp-ts/TaskEither';
 
 import { StepWithTransformer } from '../core/data/step';
 import { StepsMap } from '../core/data/steps-map';
@@ -10,42 +11,36 @@ import { ClearSequenceData, GetSequenceData } from './dependencies/sequence-data
 
 export const saveSequenceUsecase =
   (stepsMap: StepsMap<StepWithTransformer>) =>
-  async (deps: {
+  (deps: {
     getSequenceData: GetSequenceData;
     clearSequenceData: ClearSequenceData;
     getSheetInfo: GetSheetInfo;
     saveInGoogleSheet: SaveInGoogleSheet;
-  }) => {
-    const preparedData = pipe(
+  }) =>
+    pipe(
       deps.getSequenceData(),
       E.fromOption(() => new Error('No data to save!')),
-      E.chain((sequenceData) =>
+      E.bindTo('sequenceData'),
+      E.bind('sheetInfo', ({ sequenceData }) =>
         pipe(
           deps.getSheetInfo(sequenceData.id),
           E.fromOption(() => new Error('No sheet info!')),
-          E.map((sheetInfo) =>
-            pipe(
-              sequenceData.steps,
-              A.map(({ id, value }) =>
-                pipe(
-                  stepsMap.getBy(id),
-                  O.map((s) => s.transformer?.(value) || value),
-                ),
+        ),
+      ),
+      E.bind('sheetRow', ({ sequenceData }) =>
+        E.of(
+          pipe(
+            sequenceData.steps,
+            A.map(({ id, value }) =>
+              pipe(
+                stepsMap.getBy(id),
+                O.map((s) => s.transformer?.(value) || value),
               ),
-              (sheetRow) => ({
-                sheetRow,
-                sheetInfo,
-              }),
             ),
           ),
         ),
       ),
-      E.fold((e) => {
-        throw e;
-      }, identity),
+      TE.fromEither,
+      TE.chain(({ sheetInfo, sheetRow }) => deps.saveInGoogleSheet(sheetInfo, [sheetRow])),
+      TE.map(() => deps.clearSequenceData()),
     );
-
-    await deps.saveInGoogleSheet(preparedData.sheetInfo, [preparedData.sheetRow]);
-
-    deps.clearSequenceData();
-  };

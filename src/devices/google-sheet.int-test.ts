@@ -1,3 +1,5 @@
+import * as E from 'fp-ts/Either';
+import { constVoid } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/Option';
 
 import { configuration } from '../configuration';
@@ -13,6 +15,6 @@ it('should append data', async () => {
   await expect(
     connectToGoogleSheet(configuration.google).append(sheetInfo, [
       [O.some('Hello'), O.some('my friend')],
-    ]),
-  ).resolves.toBeUndefined();
+    ])(),
+  ).resolves.toEqual(E.right(constVoid()));
 });
