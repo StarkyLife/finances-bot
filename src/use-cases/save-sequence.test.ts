@@ -1,4 +1,7 @@
+import * as E from 'fp-ts/Either';
+import { constVoid } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/Option';
+import * as TE from 'fp-ts/TaskEither';
 
 import { createStepsMap } from '../core/create-steps-map';
 import { SheetInfo } from '../core/data/sheet';
@@ -25,7 +28,7 @@ it('should save data in google sheet and clear', async () => {
 
   const getSequenceData = jest.fn().mockReturnValue(O.some(sequenceData));
   const getSheetInfo = jest.fn().mockReturnValue(O.some(sheetInfo));
-  const saveInGoogleSheet = jest.fn();
+  const saveInGoogleSheet = jest.fn().mockReturnValue(TE.of(constVoid()));
   const clearSequenceData = jest.fn();
 
   await saveSequenceUsecase(stepsMap)({
@@ -33,7 +36,7 @@ it('should save data in google sheet and clear', async () => {
     clearSequenceData,
     getSheetInfo,
     saveInGoogleSheet,
-  });
+  })();
 
   expect(saveInGoogleSheet).toHaveBeenCalledWith(sheetInfo, [
     [O.some('Income'), O.some('Value transformed'), O.none],
@@ -46,17 +49,17 @@ it('should throw if sequence data is not exist', async () => {
 
   const getSequenceData = jest.fn().mockReturnValue(O.none);
   const getSheetInfo = jest.fn();
-  const saveInGoogleSheet = jest.fn();
+  const saveInGoogleSheet = jest.fn().mockReturnValue(TE.of(constVoid()));
   const clearSequenceData = jest.fn();
 
-  await expect(
-    saveSequenceUsecase(stepsMap)({
-      getSequenceData,
-      clearSequenceData,
-      getSheetInfo,
-      saveInGoogleSheet,
-    }),
-  ).rejects.toThrow();
+  const result = await saveSequenceUsecase(stepsMap)({
+    getSequenceData,
+    clearSequenceData,
+    getSheetInfo,
+    saveInGoogleSheet,
+  })();
+
+  expect(E.isLeft(result)).toBe(true);
 });
 
 it('should throw if sheet id is not found', async () => {
@@ -68,15 +71,15 @@ it('should throw if sheet id is not found', async () => {
 
   const getSequenceData = jest.fn().mockReturnValue(O.some(sequenceData));
   const getSheetInfo = jest.fn().mockReturnValue(O.none);
-  const saveInGoogleSheet = jest.fn();
+  const saveInGoogleSheet = jest.fn().mockReturnValue(TE.of(constVoid()));
   const clearSequenceData = jest.fn();
 
-  await expect(
-    saveSequenceUsecase(stepsMap)({
-      getSequenceData,
-      clearSequenceData,
-      getSheetInfo,
-      saveInGoogleSheet,
-    }),
-  ).rejects.toThrow();
+  const result = await saveSequenceUsecase(stepsMap)({
+    getSequenceData,
+    clearSequenceData,
+    getSheetInfo,
+    saveInGoogleSheet,
+  })();
+
+  expect(E.isLeft(result)).toBe(true);
 });

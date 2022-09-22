@@ -1,4 +1,5 @@
 import * as O from 'fp-ts/Option';
+import * as TE from 'fp-ts/TaskEither';
 import { google } from 'googleapis';
 
 import { SaveInGoogleSheet } from '../use-cases/dependencies/google-sheet';
@@ -19,14 +20,17 @@ export const connectToGoogleSheet = (config: GoogleConfig): GoogleSheet => {
   });
 
   return {
-    append: async (sheetInfo, values) => {
-      // append finds table and adds to new row after last filled
-      await spreadsheets.values.append({
-        spreadsheetId: sheetInfo.id,
-        range: sheetInfo.range,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: values.map((row) => row.map((cell) => O.toUndefined(cell))) },
-      });
-    },
+    append: TE.tryCatchK(
+      async (sheetInfo, values) => {
+        // append finds table and adds to new row after last filled
+        await spreadsheets.values.append({
+          spreadsheetId: sheetInfo.id,
+          range: sheetInfo.range,
+          valueInputOption: 'USER_ENTERED',
+          requestBody: { values: values.map((row) => row.map((cell) => O.toUndefined(cell))) },
+        });
+      },
+      (reason) => new Error(`${reason}`),
+    ),
   };
 };
