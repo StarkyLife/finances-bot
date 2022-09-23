@@ -14,31 +14,26 @@ export const processStepUsecase =
     rememberCurrentStep: RememberCurrentStep,
     saveStep: SaveStep,
     stepValue: string,
-  ): E.Either<Error, O.Option<StepUI>> => {
-    const getNextStep = (stepId: string) =>
-      pipe(
-        stepsMap.getBy(stepId),
-        O.chain((s) => {
-          rememberCurrentStep(s.next);
-          return s.next;
-        }),
-        O.chain((nextStepId: string) =>
-          pipe(
-            stepsMap.getBy(nextStepId),
-            O.map(
-              ({ label, staticChoices }): StepUI => ({
-                id: nextStepId,
-                label,
-                choices: staticChoices,
-              }),
-            ),
-          ),
-        ),
-      );
-
-    return pipe(
+  ): E.Either<Error, O.Option<StepUI>> =>
+    pipe(
       getCurrentStep(),
       E.fromOption(() => new Error('Current step is not found!')),
-      E.chain((stepId) => pipe(saveStep(stepId, stepValue), E.map(getNextStep.bind(null, stepId)))),
+      E.chainFirst((stepId) => saveStep(stepId, stepValue)),
+      E.map((stepId) =>
+        pipe(
+          stepsMap.getBy(stepId),
+          O.bind('nextStepId', (s) => {
+            rememberCurrentStep(s.next);
+            return s.next;
+          }),
+          O.bind('nextStep', ({ nextStepId }) => stepsMap.getBy(nextStepId)),
+          O.map(
+            ({ nextStepId, nextStep }): StepUI => ({
+              id: nextStepId,
+              label: nextStep.label,
+              choices: nextStep.staticChoices,
+            }),
+          ),
+        ),
+      ),
     );
-  };

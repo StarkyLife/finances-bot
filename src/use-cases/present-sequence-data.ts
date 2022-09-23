@@ -14,14 +14,12 @@ export const presentSequenceDataUsecase =
     pipe(
       getSequenceData(),
       E.fromOption(() => new Error('No data to present!')),
-      E.map((data) =>
-        pipe(
-          data.steps,
-          A.filterMap(({ id, value }) =>
-            pipe(
-              stepsMap.getBy(id),
-              O.map((s): SummaryItem => ({ id, label: s.summaryLabel, value })),
-            ),
+      E.map((data) => data.steps),
+      E.map(
+        A.filterMap(({ id, value }) =>
+          pipe(
+            stepsMap.getBy(id),
+            O.map((s): SummaryItem => ({ id, label: s.summaryLabel, value })),
           ),
         ),
       ),
