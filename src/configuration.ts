@@ -1,22 +1,19 @@
 import dotenv from 'dotenv';
+import { identity, pipe } from 'fp-ts/lib/function';
+import * as O from 'fp-ts/Option';
 
 import { GoogleConfig } from './devices/data/google-config';
 
 dotenv.config();
 
-const env = (name: string, defaultValue?: string): string => {
-  const value = process.env[name];
-
-  if (typeof defaultValue !== 'undefined') {
-    return value || defaultValue;
-  }
-
-  if (!value) {
-    throw new Error(`${name} is not set!`);
-  }
-
-  return value;
-};
+const env = (name: string, defaultValue?: string): string =>
+  pipe(
+    O.fromNullable(process.env[name]),
+    O.alt(() => O.fromNullable(defaultValue)),
+    O.fold(() => {
+      throw new Error(`${name} is not set!`);
+    }, identity),
+  );
 
 type Configuration = {
   botWebhookDomain: string;
