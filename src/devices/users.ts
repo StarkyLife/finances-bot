@@ -1,3 +1,5 @@
+import * as A from 'fp-ts/Array';
+import { pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/Option';
 
 import { GetSheetInfo } from '../use-cases/dependencies/google-sheet';
@@ -17,12 +19,17 @@ export const createUserGateway = (users: User[]): UserGateway => ({
     return user;
   },
   createSheetInfoGetter: (userId) => {
-    const user = users.find((u) => u.id === userId);
+    const user = O.fromNullable(users.find((u) => u.id === userId));
 
-    return (sequenceId) => {
-      const sheetInfo = user?.sheetInfos.find((i) => i.sequenceId === sequenceId);
-
-      return sheetInfo ? O.some({ id: sheetInfo.sheetId, range: sheetInfo.range }) : O.none;
-    };
+    return (sequenceId) =>
+      pipe(
+        user,
+        O.map((u) => u.sheetInfos),
+        O.chain(A.findFirst((s) => s.sequenceId === sequenceId)),
+        O.map((sheetInfo) => ({
+          id: sheetInfo.sheetId,
+          range: sheetInfo.range,
+        })),
+      );
   },
 });
