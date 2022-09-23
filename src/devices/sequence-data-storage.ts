@@ -1,5 +1,5 @@
 import * as E from 'fp-ts/Either';
-import { constUndefined } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/Option';
 
 import { StoredSequence } from '../core/data/stored-sequence';
@@ -27,11 +27,13 @@ export const connectToSequenceDataStorage = (userId: string): SequenceDataStorag
   clearSequenceData: () => {
     sequenceDataStorage.delete(userId);
   },
-  saveStep: (id, value) => {
-    const data = sequenceDataStorage.get(userId);
-    if (!data) return E.left(new Error("Can't find sequence to save"));
-
-    sequenceDataStorage.set(userId, { ...data, steps: [...data.steps, { id, value }] });
-    return E.right(constUndefined());
-  },
+  saveStep: (id, value) =>
+    pipe(
+      sequenceDataStorage.get(userId),
+      E.fromNullable(new Error("Can't find sequence to save")),
+      E.map(
+        (data) =>
+          void sequenceDataStorage.set(userId, { ...data, steps: [...data.steps, { id, value }] }),
+      ),
+    ),
 });
