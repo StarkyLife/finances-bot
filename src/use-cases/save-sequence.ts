@@ -34,7 +34,13 @@ export const saveSequenceUsecase =
             A.map(({ id, value }) =>
               pipe(
                 stepsMap.getBy(id),
-                O.map((s) => s.transformer?.(value) || value),
+                O.chain((s) =>
+                  pipe(
+                    s.transformer,
+                    O.flap(value),
+                    O.alt(() => O.some(value)),
+                  ),
+                ),
               ),
             ),
           ),

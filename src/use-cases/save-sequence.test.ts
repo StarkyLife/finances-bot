@@ -22,8 +22,8 @@ it('should save data in google sheet and clear', async () => {
     ],
   };
   const stepsMap = createTestStepsMap([
-    ['type_id', {}],
-    ['transform_step_id', { transformer: (value) => value + ' transformed' }],
+    ['type_id', { transformer: O.none }],
+    ['transform_step_id', { transformer: O.some((value) => value + ' transformed') }],
   ]);
 
   const getSequenceData = jest.fn().mockReturnValue(O.some(sequenceData));
