@@ -1,3 +1,5 @@
+import * as TE from 'fp-ts/TaskEither';
+
 import { WBOrder } from '../core/data/orders';
 import { presentNewOrdersUsecase } from './present-new-orders';
 
@@ -14,14 +16,12 @@ it('should present only unknown new orders', async () => {
   const orders = [createWBOrder({ id: 'unknownOrderId' }), createWBOrder({ id: 'knownOrderId' })];
   const knownOrdersIds = ['knownOrderId'];
 
-  const getOrdersFromWildberries = jest.fn().mockResolvedValue(orders);
+  const getOrdersFromWildberries = jest.fn().mockReturnValue(TE.right(orders));
   const getOrdersFromCache = jest.fn().mockReturnValue(knownOrdersIds);
   const updateOrdersInCache = jest.fn();
 
-  const ordersPresentation = await presentNewOrdersUsecase(
-    getOrdersFromWildberries,
-    getOrdersFromCache,
-    updateOrdersInCache,
+  const ordersPresentation = await TE.toUnion(
+    presentNewOrdersUsecase(getOrdersFromWildberries, getOrdersFromCache, updateOrdersInCache)(),
   )();
 
   expect(ordersPresentation).toEqual([
@@ -38,7 +38,7 @@ it('should update cache', async () => {
   const orders = [createWBOrder({ id: 'unknownOrderId' }), createWBOrder({ id: 'knownOrderId' })];
   const knownOrdersIds = ['knownOrderId', 'outdatedOrderId'];
 
-  const getOrdersFromWildberries = jest.fn().mockResolvedValue(orders);
+  const getOrdersFromWildberries = jest.fn().mockReturnValue(TE.right(orders));
   const getOrdersFromCache = jest.fn().mockReturnValue(knownOrdersIds);
   const updateOrdersInCache = jest.fn();
 
@@ -46,7 +46,21 @@ it('should update cache', async () => {
     getOrdersFromWildberries,
     getOrdersFromCache,
     updateOrdersInCache,
-  )();
+  )()();
 
   expect(updateOrdersInCache).toHaveBeenCalledWith(orders.map((o) => o.id));
+});
+
+it('should handle error from WB', async () => {
+  const WB_ERROR = new Error('Error in getting orders');
+
+  const getOrdersFromWildberries = jest.fn().mockReturnValue(TE.throwError(WB_ERROR));
+  const getOrdersFromCache = jest.fn().mockReturnValue([]);
+  const updateOrdersInCache = jest.fn();
+
+  const result = await TE.toUnion(
+    presentNewOrdersUsecase(getOrdersFromWildberries, getOrdersFromCache, updateOrdersInCache)(),
+  )();
+
+  expect(result).toEqual(WB_ERROR);
 });

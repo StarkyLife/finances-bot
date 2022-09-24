@@ -14,7 +14,7 @@ it('should fill steps and send to google sheet', async () => {
   ]);
 
   await botController.processSequence(USER_ID, 'Поступления');
-  await botController.processSequence(USER_ID, '01.01.2022');
+  await botController.processSequence(USER_ID, 'Сегодня');
   await botController.processSequence(USER_ID, 'инвестиции');
   await botController.processSequence(USER_ID, 'Тестовый комментарий');
   await botController.processSequence(USER_ID, '10000');

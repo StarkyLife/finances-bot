@@ -1,6 +1,8 @@
 import * as E from 'fp-ts/Either';
 import { identity, pipe } from 'fp-ts/function';
 import * as O from 'fp-ts/Option';
+import * as T from 'fp-ts/Task';
+import * as TE from 'fp-ts/TaskEither';
 
 import { configuration } from '../configuration';
 import { configureSequences } from '../core/configure-sequences';
@@ -136,12 +138,19 @@ export const botController = {
       }
 
       if (message === LABELS.submit) {
-        await saveSequence({
-          getSequenceData,
-          clearSequenceData,
-          getSheetInfo,
-          saveInGoogleSheet,
-        });
+        const callSaveSequence = pipe(
+          saveSequence({
+            getSequenceData,
+            clearSequenceData,
+            getSheetInfo,
+            saveInGoogleSheet,
+          }),
+          TE.fold((e) => {
+            throw e;
+          }, T.of),
+        );
+
+        await callSaveSequence();
 
         return [
           {
@@ -214,7 +223,13 @@ export const botController = {
           );
 
           try {
-            const orders = await presentNewOrders();
+            const callPresentNewOrders = pipe(
+              presentNewOrders(),
+              TE.fold((e) => {
+                throw e;
+              }, T.of),
+            );
+            const orders = await callPresentNewOrders();
             for (const order of orders) {
               await messageSender(
                 chatId.value,
