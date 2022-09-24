@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+import * as O from 'fp-ts/Option';
 
 import { SequenceDescription } from '../core/data/sequence-description';
 
@@ -12,7 +13,9 @@ export const outcomeSequence: SequenceDescription = {
         label: 'Введите дату покупки:',
         summaryLabel: 'Дата',
         staticChoices: ['Сегодня'],
-        transformer: (value) => (value === 'Сегодня' ? format(new Date(), 'dd.MM.yyyy') : value),
+        transformer: O.some((value) =>
+          value === 'Сегодня' ? format(new Date(), 'dd.MM.yyyy') : value,
+        ),
       },
     },
     {
@@ -39,6 +42,7 @@ export const outcomeSequence: SequenceDescription = {
           'Самостоятельный выкуп',
           'Кредиты',
         ],
+        transformer: O.none,
       },
     },
     {
@@ -46,6 +50,7 @@ export const outcomeSequence: SequenceDescription = {
       config: {
         label: 'Введите комментарий:',
         summaryLabel: 'Комментарий',
+        transformer: O.none,
       },
     },
     {
@@ -53,6 +58,7 @@ export const outcomeSequence: SequenceDescription = {
       config: {
         label: 'Введите сумму:',
         summaryLabel: 'Сумма',
+        transformer: O.none,
       },
     },
     {
@@ -60,6 +66,7 @@ export const outcomeSequence: SequenceDescription = {
       config: {
         label: 'Введите количество:',
         summaryLabel: 'Количество',
+        transformer: O.none,
       },
     },
     {
@@ -74,6 +81,7 @@ export const outcomeSequence: SequenceDescription = {
           'расчетный счет Точка',
           'оплатил Ильшат',
         ],
+        transformer: O.none,
       },
     },
     {
@@ -81,6 +89,7 @@ export const outcomeSequence: SequenceDescription = {
       config: {
         label: 'Где/у кого куплено?',
         summaryLabel: 'Где/у кого куплено',
+        transformer: O.none,
       },
     },
   ],

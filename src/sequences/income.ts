@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+import * as O from 'fp-ts/Option';
 
 import { SequenceDescription } from '../core/data/sequence-description';
 
@@ -12,7 +13,9 @@ export const incomeSequence: SequenceDescription = {
         label: 'Введите дату:',
         summaryLabel: 'Дата',
         staticChoices: ['Сегодня'],
-        transformer: (value) => (value === 'Сегодня' ? format(new Date(), 'dd.MM.yyyy') : value),
+        transformer: O.some((value) =>
+          value === 'Сегодня' ? format(new Date(), 'dd.MM.yyyy') : value,
+        ),
       },
     },
     {
@@ -21,6 +24,7 @@ export const incomeSequence: SequenceDescription = {
         label: 'Введите категорию:',
         summaryLabel: 'Категория',
         staticChoices: ['инвестиции', 'выплаты WB'],
+        transformer: O.none,
       },
     },
     {
@@ -28,6 +32,7 @@ export const incomeSequence: SequenceDescription = {
       config: {
         label: 'Введите комментарий:',
         summaryLabel: 'Комментарий',
+        transformer: O.none,
       },
     },
     {
@@ -35,6 +40,7 @@ export const incomeSequence: SequenceDescription = {
       config: {
         label: 'Введите сумму:',
         summaryLabel: 'Сумма',
+        transformer: O.none,
       },
     },
     {
@@ -49,6 +55,7 @@ export const incomeSequence: SequenceDescription = {
           'расчетный счет Точка',
           'оплатил Ильшат',
         ],
+        transformer: O.none,
       },
     },
   ],

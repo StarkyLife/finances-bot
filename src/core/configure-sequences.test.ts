@@ -29,6 +29,7 @@ it('should construct sequence', () => {
           config: {
             label: 'firstStepLabel',
             summaryLabel: 'firstStepSummary',
+            transformer: O.none,
           },
         },
         {
@@ -36,6 +37,7 @@ it('should construct sequence', () => {
           config: {
             label: 'secondStepLabel',
             summaryLabel: 'secondStepSummary',
+            transformer: O.none,
           },
         },
       ],
@@ -54,7 +56,7 @@ it('should construct sequence', () => {
 });
 
 it('should construct steps map', () => {
-  const stepTransformer = jest.fn();
+  const stepTransformer = O.some(jest.fn());
 
   const sequencesDescriptions: SequenceDescription[] = [
     {
@@ -75,6 +77,7 @@ it('should construct steps map', () => {
           config: {
             label: 'nextStepLabel',
             summaryLabel: 'nextStepSummary',
+            transformer: O.none,
           },
         },
       ],
@@ -101,6 +104,7 @@ it('should construct steps map', () => {
           next: O.none,
           label: 'nextStepLabel',
           summaryLabel: 'nextStepSummary',
+          transformer: O.none,
         },
       ],
     ]),
