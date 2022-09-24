@@ -1,5 +1,6 @@
 import * as E from 'fp-ts/Either';
-import { identity, pipe } from 'fp-ts/function';
+import { pipe } from 'fp-ts/function';
+import * as I from 'fp-ts/Identity';
 import * as O from 'fp-ts/Option';
 import * as T from 'fp-ts/Task';
 import * as TE from 'fp-ts/TaskEither';
@@ -51,157 +52,174 @@ const processStep = processStepUsecase(stepsMap);
 const presentSequenceData = presentSequenceDataUsecase(stepsMap);
 const saveSequence = saveSequenceUsecase(stepsMap);
 
-const handleErrors = async (action: () => Promise<Answer[]>) => {
-  try {
-    const answers = await action();
-    return answers;
-  } catch (e) {
-    const error = e as Error;
-    console.log(error.stack);
-    return [
-      {
-        markdownText: error.message,
-        choices: [],
-      },
-    ];
-  }
-};
+const handleError = TE.fold<Error, Answer[], Answer[]>((e) => {
+  console.log(e.stack);
+
+  return T.of([
+    {
+      markdownText: e.message,
+      choices: [],
+    },
+  ]);
+}, T.of);
 
 export const botController = {
   labels: LABELS,
-  showAvailabelSequences: (userId: string): Promise<Answer[]> =>
-    handleErrors(async () => {
-      userGateway.authorize(userId);
-
-      const availableSequences = sequences.map((s) => s.name);
-
-      return [
+  showAvailabelSequences: (userId: string) =>
+    pipe(
+      userGateway.authorize(userId),
+      E.map((): Answer[] => [
         {
           markdownText: LABELS.newOperation,
         },
         {
           markdownText: LABELS.chooseOperation,
-          choices: availableSequences,
+          choices: sequences.map((s) => s.name),
         },
-      ];
-    }),
-  cancelSequence: (userId: string): Promise<Answer[]> =>
-    handleErrors(async () => {
-      userGateway.authorize(userId);
-
-      const { clearSequenceData } = connectToSequenceDataStorage(userId);
-      const { rememberCurrentStep } = connectToCurrentStepStorage(userId);
-
-      cancelSequenceUsecase(clearSequenceData, rememberCurrentStep);
-      return [
-        {
-          markdownText: LABELS.successfulCancel,
-          choices: [],
-        },
-      ];
-    }),
-  processSequence: (userId: string, message: string): Promise<Answer[]> =>
-    handleErrors(async () => {
-      userGateway.authorize(userId);
-
-      const getSheetInfo = userGateway.createSheetInfoGetter(userId);
-      const { createSequenceData, getSequenceData, clearSequenceData, saveStep } =
-        connectToSequenceDataStorage(userId);
-      const { getCurrentStep, rememberCurrentStep } = connectToCurrentStepStorage(userId);
-
-      const availableSequences = sequences.map((s) => s.name);
-      if (availableSequences.includes(message)) {
-        return pipe(
-          initializeSequence(rememberCurrentStep, createSequenceData, message),
-          E.fold(
-            (e) => {
-              throw e;
-            },
-            (step) => [
-              {
-                markdownText: step.label,
-                choices: step.choices ?? [],
-              },
-            ],
-          ),
-        );
-      }
-
-      if (message === LABELS.cancel) {
-        cancelSequenceUsecase(clearSequenceData, rememberCurrentStep);
-        return [
-          {
-            markdownText: LABELS.successfulCancel,
-            choices: [],
-          },
-        ];
-      }
-
-      if (message === LABELS.submit) {
-        const callSaveSequence = pipe(
-          saveSequence({
-            getSequenceData,
-            clearSequenceData,
-            getSheetInfo,
-            saveInGoogleSheet,
-          }),
-          TE.fold((e) => {
-            throw e;
-          }, T.of),
-        );
-
-        await callSaveSequence();
-
-        return [
-          {
-            markdownText: LABELS.successfulSave,
-            choices: [],
-          },
-        ];
-      }
-
-      const handleEndOfSequence = () =>
+      ]),
+      TE.fromEither,
+      handleError,
+    ),
+  cancelSequence: (userId: string) =>
+    pipe(
+      userGateway.authorize(userId),
+      E.map(() =>
         pipe(
-          presentSequenceData(getSequenceData),
-          E.map((summary): Answer[] => [
-            {
-              markdownText: summary
-                .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
-                .join('\n'),
-              choices: [LABELS.submit, LABELS.cancel],
-            },
-          ]),
-        );
-
-      return pipe(
-        processStep(getCurrentStep, rememberCurrentStep, saveStep, message),
-        E.chain((nextStep) =>
-          pipe(
-            nextStep,
-            O.fold(handleEndOfSequence, (step) =>
-              E.of([
-                {
-                  markdownText: step.label,
-                  choices: step.choices ?? [],
-                },
-              ]),
+          connectToSequenceDataStorage(userId),
+          I.bindTo('sequenceDataStorage'),
+          I.bind('currentStepStorage', () => connectToCurrentStepStorage(userId)),
+          ({ sequenceDataStorage, currentStepStorage }) =>
+            cancelSequenceUsecase(
+              sequenceDataStorage.clearSequenceData,
+              currentStepStorage.rememberCurrentStep,
             ),
-          ),
+          (): Answer[] => [
+            {
+              markdownText: LABELS.successfulCancel,
+              choices: [],
+            },
+          ],
         ),
-        E.fold((e) => {
-          throw e;
-        }, identity),
-      );
-    }),
+      ),
+      TE.fromEither,
+      handleError,
+    ),
+  processSequence: (userId: string, message: string) =>
+    pipe(
+      userGateway.authorize(userId),
+      TE.fromEither,
+      TE.chain(() =>
+        pipe(
+          userGateway.createSheetInfoGetter(userId),
+          I.bindTo('getSheetInfo'),
+          I.bind('sequenceDataStorage', () => connectToSequenceDataStorage(userId)),
+          I.bind('currentStepStorage', () => connectToCurrentStepStorage(userId)),
+          ({
+            getSheetInfo,
+            sequenceDataStorage,
+            currentStepStorage,
+          }): TE.TaskEither<Error, Answer[]> => {
+            const availableSequences = sequences.map((s) => s.name);
+            if (availableSequences.includes(message)) {
+              return pipe(
+                initializeSequence(
+                  currentStepStorage.rememberCurrentStep,
+                  sequenceDataStorage.createSequenceData,
+                  message,
+                ),
+                E.map((step) => [
+                  {
+                    markdownText: step.label,
+                    choices: step.choices ?? [],
+                  },
+                ]),
+                TE.fromEither,
+              );
+            }
+
+            if (message === LABELS.cancel) {
+              return pipe(
+                cancelSequenceUsecase(
+                  sequenceDataStorage.clearSequenceData,
+                  currentStepStorage.rememberCurrentStep,
+                ),
+                (): Answer[] => [
+                  {
+                    markdownText: LABELS.successfulCancel,
+                    choices: [],
+                  },
+                ],
+                TE.of,
+              );
+            }
+
+            if (message === LABELS.submit) {
+              return pipe(
+                saveSequence({
+                  getSequenceData: sequenceDataStorage.getSequenceData,
+                  clearSequenceData: sequenceDataStorage.clearSequenceData,
+                  getSheetInfo,
+                  saveInGoogleSheet,
+                }),
+                TE.map((): Answer[] => [
+                  {
+                    markdownText: LABELS.successfulSave,
+                    choices: [],
+                  },
+                ]),
+              );
+            }
+
+            return pipe(
+              processStep(
+                currentStepStorage.getCurrentStep,
+                currentStepStorage.rememberCurrentStep,
+                sequenceDataStorage.saveStep,
+                message,
+              ),
+              E.chain(
+                O.fold(
+                  () =>
+                    pipe(
+                      presentSequenceData(sequenceDataStorage.getSequenceData),
+                      E.map((summary): Answer[] => [
+                        {
+                          markdownText: summary
+                            .map((stepSummary) => `- *${stepSummary.label}*: ${stepSummary.value}`)
+                            .join('\n'),
+                          choices: [LABELS.submit, LABELS.cancel],
+                        },
+                      ]),
+                    ),
+                  (step) =>
+                    E.of([
+                      {
+                        markdownText: step.label,
+                        choices: step.choices ?? [],
+                      },
+                    ]),
+                ),
+              ),
+              TE.fromEither,
+            );
+          },
+        ),
+      ),
+      handleError,
+    ),
   rememberUserChat: (userId: string, chatId: string) =>
-    handleErrors(async () => {
-      userGateway.authorize(userId);
-      const chatsStorage = connectToChatsStorage(userId);
-
-      chatsStorage.rememberChat(chatId);
-
-      return [{ markdownText: LABELS.youAreRemembered }];
-    }),
+    pipe(
+      userGateway.authorize(userId),
+      E.map(() =>
+        pipe(
+          connectToChatsStorage(userId),
+          (chatsStorage) => chatsStorage.rememberChat(chatId),
+          (): Answer[] => [{ markdownText: LABELS.youAreRemembered }],
+        ),
+      ),
+      TE.fromEither,
+      handleError,
+    ),
   createWBNotificationsChecker:
     (messageSender: (chatId: string, markdownText: string) => Promise<void>) => async () => {
       const users = userGateway.getAllUsers();

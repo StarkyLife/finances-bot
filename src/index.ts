@@ -31,7 +31,8 @@ const scheduleWildberriesNotifications = () => {
 };
 
 bot.start(async (ctx) => {
-  const answers = await botController.rememberUserChat(getUserId(ctx), `${ctx.message.chat.id}`);
+  const userId = getUserId(ctx);
+  const answers = await botController.rememberUserChat(userId, `${ctx.message.chat.id}`)();
   await replyAnswers(ctx, answers);
 
   await ctx.replyWithMarkdown(
@@ -41,17 +42,19 @@ bot.start(async (ctx) => {
   );
 });
 bot.command('newoperation', async (ctx: Context) => {
-  const answers = await botController.showAvailabelSequences(getUserId(ctx));
+  const userId = getUserId(ctx);
+  const answers = await botController.showAvailabelSequences(userId)();
   await replyAnswers(ctx, answers);
 });
 bot.command('cancel', async (ctx) => {
-  const answers = await botController.cancelSequence(getUserId(ctx));
+  const userId = getUserId(ctx);
+  const answers = await botController.cancelSequence(userId)();
   await replyAnswers(ctx, answers);
 });
 
 bot.on('text', async (ctx) => {
   const userId = getUserId(ctx);
-  const answers = await botController.processSequence(userId, ctx.message.text);
+  const answers = await botController.processSequence(userId, ctx.message.text)();
   await replyAnswers(ctx, answers);
 });
 
