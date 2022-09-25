@@ -4,18 +4,22 @@ import { configureSequences } from './configure-sequences';
 import { SequenceDescription } from './data/sequence-description';
 import { Step } from './data/step';
 
-it('should throw if there is no sequences', () => {
+it('should return empty sequences given no sequences', () => {
   const sequencesDescriptions: SequenceDescription[] = [];
 
-  expect(() => configureSequences(sequencesDescriptions)).toThrow();
+  const { sequences } = configureSequences(sequencesDescriptions);
+
+  expect(sequences).toEqual([]);
 });
 
-it('should throw if found sequence without steps', () => {
+it('should skip sequence without steps', () => {
   const sequencesDescriptions: SequenceDescription[] = [
     { id: 'sequenceId', name: 'sequenceName', steps: [] },
   ];
 
-  expect(() => configureSequences(sequencesDescriptions)).toThrow();
+  const { sequences } = configureSequences(sequencesDescriptions);
+
+  expect(sequences).toEqual([]);
 });
 
 it('should construct sequence', () => {
