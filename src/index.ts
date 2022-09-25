@@ -19,14 +19,16 @@ const replyAnswers = async (ctx: Context, answers: Answer[]) => {
   }
 };
 const scheduleWildberriesNotifications = () => {
-  const checkWBNotifications = botController.createWBNotificationsChecker(
-    async (chatId, markdownText) => {
+  const runCheck = async () => {
+    const messages = await botController.checkWBNotifications()();
+
+    for (const { chatId, markdownText } of messages) {
       await bot.telegram.sendMessage(chatId, markdownText, { parse_mode: 'Markdown' });
-    },
-  );
+    }
+  };
 
   setInterval(() => {
-    checkWBNotifications();
+    runCheck();
   }, 1000 * 60 * 5);
 };
 

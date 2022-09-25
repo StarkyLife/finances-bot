@@ -1,3 +1,4 @@
+import * as A from 'fp-ts/Array';
 import * as E from 'fp-ts/Either';
 import { pipe } from 'fp-ts/function';
 import * as I from 'fp-ts/Identity';
@@ -220,51 +221,53 @@ export const botController = {
       TE.fromEither,
       handleError,
     ),
-  createWBNotificationsChecker:
-    (messageSender: (chatId: string, markdownText: string) => Promise<void>) => async () => {
-      const users = userGateway.getAllUsers();
-      await Promise.all(
-        users.map(async (user) => {
-          if (!user.wildberriesToken) return;
-
-          const chatsStorage = connectToChatsStorage(user.id);
-
-          const chatId = chatsStorage.getChat();
-          if (O.isNone(chatId)) return;
-
-          const wildberriesSDK = connectToWildberries(user.wildberriesToken);
-          const ordersCache = connectToOrdersCache(user.id);
-          const presentNewOrders = presentNewOrdersUsecase(
-            wildberriesSDK.getOrders,
-            ordersCache.getOrdersIds,
-            ordersCache.updateOrdersIds,
-          );
-
-          try {
-            const callPresentNewOrders = pipe(
-              presentNewOrders(),
-              TE.fold((e) => {
-                throw e;
-              }, T.of),
-            );
-            const orders = await callPresentNewOrders();
-            for (const order of orders) {
-              await messageSender(
-                chatId.value,
-                [
-                  `*Номер заказа* - ${order.id}`,
-                  `*Дата создания* - ${order.dateCreated}`,
-                  `*Пункт назначения* - ${order.officeAddress}`,
-                  `*Цена* - ${order.price}`,
-                ].join('\n'),
-              );
-            }
-          } catch (e) {
-            console.log(
-              `User ${user.id} could not get new orders! Reason: ${(e as Error).message}`,
-            );
-          }
-        }),
-      );
-    },
+  checkWBNotifications: () =>
+    pipe(
+      userGateway.getAllUsers(),
+      A.map((user) =>
+        pipe(
+          O.fromNullable(user.wildberriesToken),
+          O.bindTo('wildberriesToken'),
+          O.bind('chatId', () => connectToChatsStorage(user.id).getChat()),
+          O.bind('wildberriesSDK', ({ wildberriesToken }) =>
+            O.of(connectToWildberries(wildberriesToken)),
+          ),
+          O.bind('ordersCache', () => O.of(connectToOrdersCache(user.id))),
+          O.fold(
+            () => T.of([]),
+            ({ chatId, wildberriesSDK, ordersCache }) =>
+              pipe(
+                presentNewOrdersUsecase(
+                  wildberriesSDK.getOrders,
+                  ordersCache.getOrdersIds,
+                  ordersCache.updateOrdersIds,
+                ),
+                TE.map(
+                  A.map((order) => ({
+                    chatId,
+                    markdownText: [
+                      `*Номер заказа* - ${order.id}`,
+                      `*Дата создания* - ${order.dateCreated}`,
+                      `*Пункт назначения* - ${order.officeAddress}`,
+                      `*Цена* - ${order.price}`,
+                    ].join('\n'),
+                  })),
+                ),
+                TE.fold(
+                  (e) =>
+                    T.of([
+                      {
+                        chatId,
+                        markdownText: `User ${user.id} could not get new orders! Reason: ${e.message}`,
+                      },
+                    ]),
+                  T.of,
+                ),
+              ),
+          ),
+        ),
+      ),
+      A.sequence(T.ApplicativeSeq),
+      T.map(A.flatten),
+    ),
 };
