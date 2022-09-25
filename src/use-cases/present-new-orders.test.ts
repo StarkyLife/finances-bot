@@ -21,7 +21,7 @@ it('should present only unknown new orders', async () => {
   const updateOrdersInCache = jest.fn();
 
   const ordersPresentation = await TE.toUnion(
-    presentNewOrdersUsecase(getOrdersFromWildberries, getOrdersFromCache, updateOrdersInCache)(),
+    presentNewOrdersUsecase(getOrdersFromWildberries, getOrdersFromCache, updateOrdersInCache),
   )();
 
   expect(ordersPresentation).toEqual([
@@ -46,7 +46,7 @@ it('should update cache', async () => {
     getOrdersFromWildberries,
     getOrdersFromCache,
     updateOrdersInCache,
-  )()();
+  )();
 
   expect(updateOrdersInCache).toHaveBeenCalledWith(orders.map((o) => o.id));
 });
@@ -59,7 +59,7 @@ it('should handle error from WB', async () => {
   const updateOrdersInCache = jest.fn();
 
   const result = await TE.toUnion(
-    presentNewOrdersUsecase(getOrdersFromWildberries, getOrdersFromCache, updateOrdersInCache)(),
+    presentNewOrdersUsecase(getOrdersFromWildberries, getOrdersFromCache, updateOrdersInCache),
   )();
 
   expect(result).toEqual(WB_ERROR);
