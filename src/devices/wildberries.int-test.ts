@@ -1,4 +1,10 @@
+import * as A from 'fp-ts/Array';
+import * as E from 'fp-ts/Either';
+import { constUndefined, flow, pipe } from 'fp-ts/function';
+import * as TE from 'fp-ts/TaskEither';
+
 import { configuration } from '../configuration';
+import { OrderStatus } from '../core/data/orders';
 import { connectToWildberries } from './wildberries';
 
 describe.skip('wildberries', () => {
@@ -6,9 +12,9 @@ describe.skip('wildberries', () => {
     const token = configuration.wildberriesToken;
     const wildberriesSDK = connectToWildberries(token);
 
-    const orders = await wildberriesSDK.getOrders();
+    const orders = await wildberriesSDK.getOrders()();
 
-    expect(orders).toEqual(
+    expect(E.toUnion(orders)).toEqual(
       expect.arrayContaining([
         {
           currency: 'RUB',
@@ -16,8 +22,47 @@ describe.skip('wildberries', () => {
           id: expect.any(String),
           officeAddress: expect.any(String),
           price: expect.any(Number),
+          status: OrderStatus.NEW,
         },
       ]),
     );
+  });
+
+  it('should be able to change wb order status', async () => {
+    const token = configuration.wildberriesToken;
+    const wildberriesSDK = connectToWildberries(token);
+
+    const checkOrderStatusChanged = pipe(
+      wildberriesSDK.getOrders(),
+      TE.chain(
+        flow(
+          A.findFirst((o) => o.status === OrderStatus.NEW),
+          TE.fromOption(() => new Error(`Couldn't find order in status = ${OrderStatus.NEW}`)),
+        ),
+      ),
+      TE.chain((order) =>
+        pipe(
+          wildberriesSDK.changeWBOrderStatus(order.id, OrderStatus.IN_WORK),
+          TE.chain(wildberriesSDK.getOrders),
+          TE.chain(
+            flow(
+              A.findFirst((o) => o.id === order.id),
+              TE.fromOption(() => new Error(`Couldn\'t find same order with id = ${order.id}`)),
+            ),
+          ),
+          TE.chain(
+            TE.fromPredicate(
+              (o) => o.status === OrderStatus.IN_WORK,
+              (o) => new Error(`Status has not been changed. Current = ${o.status}`),
+            ),
+          ),
+          TE.map(constUndefined),
+        ),
+      ),
+    );
+
+    const result = await checkOrderStatusChanged();
+
+    expect(E.toUnion(result)).toBeUndefined();
   });
 });
