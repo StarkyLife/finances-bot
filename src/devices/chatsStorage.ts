@@ -1,15 +1,18 @@
-import * as O from 'fp-ts/Option';
+import * as IO from 'fp-ts/IO';
+import * as IOO from 'fp-ts/IOOption';
+import { constVoid } from 'fp-ts/function';
 
 type ChatsStorage = {
-  getChat: () => O.Option<string>;
-  rememberChat: (chatId: string) => void;
+  getChat: () => IOO.IOOption<string>;
+  rememberChat: (chatId: string) => IO.IO<void>;
 };
 
 const chatsStorage = new Map<string, string>();
 
 export const connectToChatsStorage = (userId: string): ChatsStorage => ({
-  getChat: () => O.fromNullable(chatsStorage.get(userId)),
+  getChat: () => IOO.fromNullable(chatsStorage.get(userId)),
   rememberChat: (chatId) => {
     chatsStorage.set(userId, chatId);
+    return IO.of(constVoid());
   },
 });

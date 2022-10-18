@@ -5,6 +5,7 @@ import * as I from 'fp-ts/Identity';
 import * as O from 'fp-ts/Option';
 import * as T from 'fp-ts/Task';
 import * as TE from 'fp-ts/TaskEither';
+import * as IOE from 'fp-ts/IOEither';
 
 import { configuration } from '../configuration';
 import { configureSequences } from '../core/configure-sequences';
@@ -211,14 +212,14 @@ export const botController = {
   rememberUserChat: (userId: string, chatId: string) =>
     pipe(
       userGateway.authorize(userId),
-      E.map(() =>
-        pipe(
-          connectToChatsStorage(userId),
-          (chatsStorage) => chatsStorage.rememberChat(chatId),
-          (): Answer[] => [{ markdownText: LABELS.youAreRemembered }],
-        ),
+      E.map(() => connectToChatsStorage(userId)),
+      E.map((chatsStorage) => chatsStorage.rememberChat(chatId)),
+      IOE.fromEither,
+      IOE.chain((io) => IOE.fromIO(io)),
+      IOE.map(
+        (): Answer[] => [{ markdownText: LABELS.youAreRemembered }],
       ),
-      TE.fromEither,
+      TE.fromIOEither,
       handleError,
     ),
   checkWBNotifications: () =>
@@ -228,7 +229,7 @@ export const botController = {
         pipe(
           O.fromNullable(user.wildberriesToken),
           O.bindTo('wildberriesToken'),
-          O.bind('chatId', () => connectToChatsStorage(user.id).getChat()),
+          O.bind('chatId', () => connectToChatsStorage(user.id).getChat()()),
           O.bind('wildberriesSDK', ({ wildberriesToken }) =>
             O.of(connectToWildberries(wildberriesToken)),
           ),
