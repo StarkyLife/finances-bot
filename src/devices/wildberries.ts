@@ -5,11 +5,15 @@ import * as E from 'fp-ts/Either';
 import { pipe } from 'fp-ts/lib/function';
 import * as TE from 'fp-ts/TaskEither';
 
-import { GetOrdersFromWildberries } from '../use-cases/dependencies/wildberries';
+import {
+  ChangeWBOrderStatus,
+  GetOrdersFromWildberries,
+} from '../use-cases/dependencies/wildberries';
 import { WildberriesOrdersResponse } from './data/wildberries-orders-response';
 
 type WildberriesSDK = {
   getOrders: GetOrdersFromWildberries;
+  changeWBOrderStatus: ChangeWBOrderStatus;
 };
 
 export const connectToWildberries = (token: string): WildberriesSDK => {
@@ -37,7 +41,19 @@ export const connectToWildberries = (token: string): WildberriesSDK => {
             officeAddress: o.officeAddress,
             currency: 'RUB',
             price: o.convertedPrice,
+            status: o.status,
           })),
+        ),
+      ),
+    changeWBOrderStatus: (orderId, orderStatus) =>
+      pipe(
+        [{ orderId, status: orderStatus }],
+        TE.tryCatchK(
+          (data) =>
+            axios.put('https://suppliers-api.wildberries.ru/api/v2/orders', data, {
+              headers: { Authorization: token },
+            }),
+          E.toError,
         ),
       ),
   };

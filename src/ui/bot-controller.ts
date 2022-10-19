@@ -1,7 +1,8 @@
 import * as A from 'fp-ts/Array';
 import * as E from 'fp-ts/Either';
-import { pipe } from 'fp-ts/function';
+import { flow, pipe } from 'fp-ts/function';
 import * as I from 'fp-ts/Identity';
+import * as IOE from 'fp-ts/IOEither';
 import * as O from 'fp-ts/Option';
 import * as T from 'fp-ts/Task';
 import * as TE from 'fp-ts/TaskEither';
@@ -23,6 +24,7 @@ import { presentNewOrdersUsecase } from '../use-cases/present-new-orders';
 import { presentSequenceDataUsecase } from '../use-cases/present-sequence-data';
 import { processStepUsecase } from '../use-cases/process-step';
 import { saveSequenceUsecase } from '../use-cases/save-sequence';
+import { takeOrderToWorkUsecase } from '../use-cases/take-order-to-work';
 import { Answer } from './data/answer';
 import { LABELS } from './data/labels';
 
@@ -211,14 +213,12 @@ export const botController = {
   rememberUserChat: (userId: string, chatId: string) =>
     pipe(
       userGateway.authorize(userId),
-      E.map(() =>
-        pipe(
-          connectToChatsStorage(userId),
-          (chatsStorage) => chatsStorage.rememberChat(chatId),
-          (): Answer[] => [{ markdownText: LABELS.youAreRemembered }],
-        ),
-      ),
-      TE.fromEither,
+      E.map(() => connectToChatsStorage(userId)),
+      E.map((chatsStorage) => chatsStorage.rememberChat(chatId)),
+      IOE.fromEither,
+      IOE.chain((io) => IOE.fromIO(io)),
+      IOE.map((): Answer[] => [{ markdownText: LABELS.youAreRemembered }]),
+      TE.fromIOEither,
       handleError,
     ),
   checkWBNotifications: () =>
@@ -228,7 +228,7 @@ export const botController = {
         pipe(
           O.fromNullable(user.wildberriesToken),
           O.bindTo('wildberriesToken'),
-          O.bind('chatId', () => connectToChatsStorage(user.id).getChat()),
+          O.bind('chatId', () => connectToChatsStorage(user.id).getChat()()),
           O.bind('wildberriesSDK', ({ wildberriesToken }) =>
             O.of(connectToWildberries(wildberriesToken)),
           ),
@@ -251,6 +251,12 @@ export const botController = {
                       `*Пункт назначения* - ${order.officeAddress}`,
                       `*Цена* - ${order.price}`,
                     ].join('\n'),
+                    actions: [
+                      {
+                        text: 'Взять в работу',
+                        data: order.id,
+                      },
+                    ],
                   })),
                 ),
                 TE.fold(
@@ -259,6 +265,7 @@ export const botController = {
                       {
                         chatId,
                         markdownText: `User ${user.id} could not get new orders! Reason: ${e.message}`,
+                        actions: [],
                       },
                     ]),
                   T.of,
@@ -269,5 +276,31 @@ export const botController = {
       ),
       A.sequence(T.ApplicativeSeq),
       T.map(A.flatten),
+    ),
+  takeOrderToWork: (userId: string, orderId: string | undefined) =>
+    pipe(
+      TE.Do,
+      TE.bind('orderId', () => pipe(orderId, TE.fromNullable(new Error('Order ID is not sent!')))),
+      TE.bind('token', () =>
+        pipe(
+          userGateway.authorize(userId),
+          E.chain(
+            flow(
+              (user) => O.fromNullable(user.wildberriesToken),
+              E.fromOption(() => new Error('No wildberries token!')),
+            ),
+          ),
+          TE.fromEither,
+        ),
+      ),
+      TE.bind('sdk', ({ token }) => TE.of(connectToWildberries(token))),
+      TE.chain(({ sdk, orderId }) => takeOrderToWorkUsecase(sdk.changeWBOrderStatus, orderId)),
+      TE.map(() => [
+        {
+          markdownText: LABELS.successfulStatusChange,
+          choices: [],
+        },
+      ]),
+      handleError,
     ),
 };

@@ -11,4 +11,5 @@ export const LABELS = {
   cancel: 'Отменить',
   successfulCancel: 'Изменения отменены!',
   youAreRemembered: 'Мы вас запомнили!',
+  successfulStatusChange: 'Статус заказа изменен!',
 };

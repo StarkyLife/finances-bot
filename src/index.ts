@@ -22,8 +22,12 @@ const scheduleWildberriesNotifications = () => {
   const runCheck = async () => {
     const messages = await botController.checkWBNotifications()();
 
-    for (const { chatId, markdownText } of messages) {
-      await bot.telegram.sendMessage(chatId, markdownText, { parse_mode: 'Markdown' });
+    for (const { chatId, markdownText, actions } of messages) {
+      await bot.telegram.sendMessage(chatId, markdownText, {
+        parse_mode: 'Markdown',
+        ...(actions.length &&
+          Markup.inlineKeyboard(actions.map((a) => Markup.button.callback(a.text, a.data)))),
+      });
     }
   };
 
@@ -57,6 +61,13 @@ bot.command('cancel', async (ctx) => {
 bot.on('text', async (ctx) => {
   const userId = getUserId(ctx);
   const answers = await botController.processSequence(userId, ctx.message.text)();
+  await replyAnswers(ctx, answers);
+});
+
+bot.on('callback_query', async (ctx) => {
+  const userId = getUserId(ctx);
+  const orderId = ctx.callbackQuery.data;
+  const answers = await botController.takeOrderToWork(userId, orderId)();
   await replyAnswers(ctx, answers);
 });
 
