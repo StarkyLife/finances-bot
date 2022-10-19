@@ -251,6 +251,12 @@ export const botController = {
                       `*Пункт назначения* - ${order.officeAddress}`,
                       `*Цена* - ${order.price}`,
                     ].join('\n'),
+                    actions: [
+                      {
+                        text: 'Взять в работу',
+                        data: order.id,
+                      },
+                    ],
                   })),
                 ),
                 TE.fold(
@@ -259,6 +265,7 @@ export const botController = {
                       {
                         chatId,
                         markdownText: `User ${user.id} could not get new orders! Reason: ${e.message}`,
+                        actions: [],
                       },
                     ]),
                   T.of,
@@ -270,18 +277,24 @@ export const botController = {
       A.sequence(T.ApplicativeSeq),
       T.map(A.flatten),
     ),
-  takeOrderToWork: (userId: string, orderId: string) =>
+  takeOrderToWork: (userId: string, orderId: string | undefined) =>
     pipe(
-      userGateway.authorize(userId),
-      E.chain(
-        flow(
-          (user) => O.fromNullable(user.wildberriesToken),
-          E.fromOption(() => new Error('No wildberries token!')),
+      TE.Do,
+      TE.bind('orderId', () => pipe(orderId, TE.fromNullable(new Error('Order ID is not sent!')))),
+      TE.bind('token', () =>
+        pipe(
+          userGateway.authorize(userId),
+          E.chain(
+            flow(
+              (user) => O.fromNullable(user.wildberriesToken),
+              E.fromOption(() => new Error('No wildberries token!')),
+            ),
+          ),
+          TE.fromEither,
         ),
       ),
-      TE.fromEither,
-      TE.map(connectToWildberries),
-      TE.chain((sdk) => takeOrderToWorkUsecase(sdk.changeWBOrderStatus, orderId)),
+      TE.bind('sdk', ({ token }) => TE.of(connectToWildberries(token))),
+      TE.chain(({ sdk, orderId }) => takeOrderToWorkUsecase(sdk.changeWBOrderStatus, orderId)),
       TE.map(() => [
         {
           markdownText: LABELS.successfulStatusChange,
