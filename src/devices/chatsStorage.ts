@@ -1,6 +1,6 @@
+import { constVoid } from 'fp-ts/function';
 import * as IO from 'fp-ts/IO';
 import * as IOO from 'fp-ts/IOOption';
-import { constVoid } from 'fp-ts/function';
 
 type ChatsStorage = {
   getChat: () => IOO.IOOption<string>;

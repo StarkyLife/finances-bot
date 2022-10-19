@@ -1,11 +1,11 @@
 import * as A from 'fp-ts/Array';
 import * as E from 'fp-ts/Either';
-import { pipe } from 'fp-ts/function';
+import { flow, pipe } from 'fp-ts/function';
 import * as I from 'fp-ts/Identity';
+import * as IOE from 'fp-ts/IOEither';
 import * as O from 'fp-ts/Option';
 import * as T from 'fp-ts/Task';
 import * as TE from 'fp-ts/TaskEither';
-import * as IOE from 'fp-ts/IOEither';
 
 import { configuration } from '../configuration';
 import { configureSequences } from '../core/configure-sequences';
@@ -24,6 +24,7 @@ import { presentNewOrdersUsecase } from '../use-cases/present-new-orders';
 import { presentSequenceDataUsecase } from '../use-cases/present-sequence-data';
 import { processStepUsecase } from '../use-cases/process-step';
 import { saveSequenceUsecase } from '../use-cases/save-sequence';
+import { takeOrderToWorkUsecase } from '../use-cases/take-order-to-work';
 import { Answer } from './data/answer';
 import { LABELS } from './data/labels';
 
@@ -216,9 +217,7 @@ export const botController = {
       E.map((chatsStorage) => chatsStorage.rememberChat(chatId)),
       IOE.fromEither,
       IOE.chain((io) => IOE.fromIO(io)),
-      IOE.map(
-        (): Answer[] => [{ markdownText: LABELS.youAreRemembered }],
-      ),
+      IOE.map((): Answer[] => [{ markdownText: LABELS.youAreRemembered }]),
       TE.fromIOEither,
       handleError,
     ),
@@ -270,5 +269,25 @@ export const botController = {
       ),
       A.sequence(T.ApplicativeSeq),
       T.map(A.flatten),
+    ),
+  takeOrderToWork: (userId: string, orderId: string) =>
+    pipe(
+      userGateway.authorize(userId),
+      E.chain(
+        flow(
+          (user) => O.fromNullable(user.wildberriesToken),
+          E.fromOption(() => new Error('No wildberries token!')),
+        ),
+      ),
+      TE.fromEither,
+      TE.map(connectToWildberries),
+      TE.chain((sdk) => takeOrderToWorkUsecase(sdk.changeWBOrderStatus, orderId)),
+      TE.map(() => [
+        {
+          markdownText: LABELS.successfulStatusChange,
+          choices: [],
+        },
+      ]),
+      handleError,
     ),
 };
