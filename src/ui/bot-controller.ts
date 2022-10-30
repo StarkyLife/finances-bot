@@ -222,55 +222,60 @@ export const botController = {
       handleError,
     ),
   checkWBNotifications: () =>
-    pipe(userGateway.getAllUsers()[0], (user) =>
-      pipe(
-        O.fromNullable(user.wildberriesToken),
-        O.bindTo('wildberriesToken'),
-        O.bind('chatId', () => connectToChatsStorage(user.id).getChat()()),
-        O.bind('wildberriesSDK', ({ wildberriesToken }) =>
-          O.of(connectToWildberries(configuration.wildberriesUrl, wildberriesToken)),
-        ),
-        O.bind('ordersCache', () => O.of(connectToOrdersCache(user.id))),
-        O.fold(
-          () => T.of([]),
-          ({ chatId, wildberriesSDK, ordersCache }) =>
-            pipe(
-              presentNewOrdersUsecase(
-                wildberriesSDK.getOrders,
-                ordersCache.getOrdersIds,
-                ordersCache.updateOrdersIds,
+    pipe(
+      userGateway.getAllUsers(),
+      A.map((user) =>
+        pipe(
+          O.fromNullable(user.wildberriesToken),
+          O.bindTo('wildberriesToken'),
+          O.bind('chatId', () => connectToChatsStorage(user.id).getChat()()),
+          O.bind('wildberriesSDK', ({ wildberriesToken }) =>
+            O.of(connectToWildberries(configuration.wildberriesUrl, wildberriesToken)),
+          ),
+          O.bind('ordersCache', () => O.of(connectToOrdersCache(user.id))),
+          O.fold(
+            () => T.of([]),
+            ({ chatId, wildberriesSDK, ordersCache }) =>
+              pipe(
+                presentNewOrdersUsecase(
+                  wildberriesSDK.getOrders,
+                  ordersCache.getOrdersIds,
+                  ordersCache.updateOrdersIds,
+                ),
+                TE.map(
+                  A.map((order) => ({
+                    chatId,
+                    markdownText: [
+                      `*Номер заказа* - ${order.id}`,
+                      `*Дата создания* - ${order.dateCreated}`,
+                      `*Пункт назначения* - ${order.officeAddress}`,
+                      `*Цена* - ${order.price}`,
+                    ].join('\n'),
+                    actions: [
+                      {
+                        text: 'Взять в работу',
+                        data: order.id,
+                      },
+                    ],
+                  })),
+                ),
+                TE.fold(
+                  (e) =>
+                    T.of([
+                      {
+                        chatId,
+                        markdownText: `User ${user.id} could not get new orders! Reason: ${e.message}`,
+                        actions: [],
+                      },
+                    ]),
+                  T.of,
+                ),
               ),
-              TE.map(
-                A.map((order) => ({
-                  chatId,
-                  markdownText: [
-                    `*Номер заказа* - ${order.id}`,
-                    `*Дата создания* - ${order.dateCreated}`,
-                    `*Пункт назначения* - ${order.officeAddress}`,
-                    `*Цена* - ${order.price}`,
-                  ].join('\n'),
-                  actions: [
-                    {
-                      text: 'Взять в работу',
-                      data: order.id,
-                    },
-                  ],
-                })),
-              ),
-              TE.fold(
-                (e) =>
-                  T.of([
-                    {
-                      chatId,
-                      markdownText: `User ${user.id} could not get new orders! Reason: ${e.message}`,
-                      actions: [],
-                    },
-                  ]),
-                T.of,
-              ),
-            ),
+          ),
         ),
       ),
+      A.sequence(T.ApplicativeSeq),
+      T.map(A.flatten),
     ),
   takeOrderToWork: (userId: string, orderId: string | undefined) =>
     pipe(
