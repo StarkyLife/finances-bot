@@ -1,6 +1,6 @@
 import { formatInTimeZone } from 'date-fns-tz';
 import * as A from 'fp-ts/Array';
-import { flow, pipe } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/function';
 import * as T from 'fp-ts/Task';
 import * as TE from 'fp-ts/TaskEither';
 
@@ -15,18 +15,17 @@ export const presentNewOrdersUsecase = (
 ): TE.TaskEither<Error, OrderPresentation[]> =>
   pipe(
     getOrdersFromWildberries(),
-    TE.chainFirstTaskK(
-      flow(
+    TE.bindTo('orders'),
+    TE.bind('knownOrdersIds', () => TE.of(getOrdersFromCache())),
+    TE.chainFirstTaskK(({ orders }) =>
+      pipe(
+        orders,
         A.map((o) => o.id),
         updateOrdersInCache,
         T.of,
       ),
     ),
-    TE.map((orders) =>
-      pipe(getOrdersFromCache(), (knownOrdersIds) =>
-        orders.filter((o) => !knownOrdersIds.includes(o.id)),
-      ),
-    ),
+    TE.map(({ orders, knownOrdersIds }) => orders.filter((o) => !knownOrdersIds.includes(o.id))),
     TE.map(
       A.map(
         (o): OrderPresentation => ({
