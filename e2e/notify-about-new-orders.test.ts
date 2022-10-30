@@ -1,9 +1,10 @@
 import axios from 'axios';
+
 import { botController } from '../src/ui/bot-controller';
 
 const mockServerURL = {
   status: 'http://mockserver:1080/mockserver/status',
-  expectation: 'http://mockserver:1080/mockserver/expectation'
+  expectation: 'http://mockserver:1080/mockserver/expectation',
 };
 
 const USER_ID = 'StarkyLife';
