@@ -27,6 +27,7 @@ jobs:
           echo "INCOME_RANGE=ДОХОДЫ" >> .env
           echo "OUTCOME_RANGE=РАСХОДЫ" >> .env
           echo "WILDBERRIES_TOKEN=\"${{ secrets.WILDBERRIES_TOKEN }}\"" >> .env
+          echo "WILDBERRIES_URL=http://localhost:1080" >> .env
       - name: Integration tests
         run: yarn test:int
       - name: E2E tests

@@ -44,6 +44,7 @@
     "ts:check": "tsc --noEmit",
     "test": "jest src",
     "test:int": "jest --testMatch \"**/*.int-test.ts\"",
-    "test:e2e": "jest e2e"
+    "test:e2e": "jest e2e",
+    "mocked:test": "docker-compose -f docker-compose.e2e.yml up --build --abort-on-container-exit --exit-code-from finances-bot"
   }
 }

@@ -7,10 +7,11 @@ import { configuration } from '../configuration';
 import { OrderStatus } from '../core/data/orders';
 import { connectToWildberries } from './wildberries';
 
+const { wildberriesToken, wildberriesUrl } = configuration;
+
 describe.skip('wildberries', () => {
   it('should be able to get orders', async () => {
-    const token = configuration.wildberriesToken;
-    const wildberriesSDK = connectToWildberries(token);
+    const wildberriesSDK = connectToWildberries(wildberriesUrl, wildberriesToken);
 
     const orders = await wildberriesSDK.getOrders()();
 
@@ -29,8 +30,7 @@ describe.skip('wildberries', () => {
   });
 
   it('should be able to change wb order status', async () => {
-    const token = configuration.wildberriesToken;
-    const wildberriesSDK = connectToWildberries(token);
+    const wildberriesSDK = connectToWildberries(wildberriesUrl, wildberriesToken);
 
     const checkOrderStatusChanged = pipe(
       wildberriesSDK.getOrders(),

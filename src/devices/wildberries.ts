@@ -16,7 +16,7 @@ type WildberriesSDK = {
   changeWBOrderStatus: ChangeWBOrderStatus;
 };
 
-export const connectToWildberries = (token: string): WildberriesSDK => {
+export const connectToWildberries = (apiUrl: string, token: string): WildberriesSDK => {
   return {
     getOrders: () =>
       pipe(
@@ -27,10 +27,9 @@ export const connectToWildberries = (token: string): WildberriesSDK => {
         }).toString(),
         TE.tryCatchK(
           (params) =>
-            axios.get<WildberriesOrdersResponse>(
-              `https://suppliers-api.wildberries.ru/api/v2/orders?${params}`,
-              { headers: { Authorization: token } },
-            ),
+            axios.get<WildberriesOrdersResponse>(`${apiUrl}/orders?${params}`, {
+              headers: { Authorization: token },
+            }),
           E.toError,
         ),
         TE.map((response) => response.data.orders),
@@ -50,7 +49,7 @@ export const connectToWildberries = (token: string): WildberriesSDK => {
         [{ orderId, status: orderStatus }],
         TE.tryCatchK(
           (data) =>
-            axios.put('https://suppliers-api.wildberries.ru/api/v2/orders', data, {
+            axios.put(`${apiUrl}/orders`, data, {
               headers: { Authorization: token },
             }),
           E.toError,
