@@ -25,6 +25,7 @@ type Configuration = {
   incomeRange: string;
   outcomeSheetId: string;
   outcomeRange: string;
+  wildberriesUrl: string;
   wildberriesToken: string;
 };
 
@@ -41,5 +42,6 @@ export const configuration: Configuration = {
   incomeRange: env('INCOME_RANGE', ''),
   outcomeSheetId: env('OUTCOME_SHEET_ID', ''),
   outcomeRange: env('OUTCOME_RANGE', ''),
-  wildberriesToken: env('WILDBERRIES_TOKEN', ''),
+  wildberriesUrl: env('WILDBERRIES_URL'),
+  wildberriesToken: env('WILDBERRIES_TOKEN'),
 };

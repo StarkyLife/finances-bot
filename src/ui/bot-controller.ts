@@ -230,7 +230,7 @@ export const botController = {
           O.bindTo('wildberriesToken'),
           O.bind('chatId', () => connectToChatsStorage(user.id).getChat()()),
           O.bind('wildberriesSDK', ({ wildberriesToken }) =>
-            O.of(connectToWildberries(wildberriesToken)),
+            O.of(connectToWildberries(configuration.wildberriesUrl, wildberriesToken)),
           ),
           O.bind('ordersCache', () => O.of(connectToOrdersCache(user.id))),
           O.fold(
@@ -293,7 +293,9 @@ export const botController = {
           TE.fromEither,
         ),
       ),
-      TE.bind('sdk', ({ token }) => TE.of(connectToWildberries(token))),
+      TE.bind('sdk', ({ token }) =>
+        TE.of(connectToWildberries(configuration.wildberriesUrl, token)),
+      ),
       TE.chain(({ sdk, orderId }) => takeOrderToWorkUsecase(sdk.changeWBOrderStatus, orderId)),
       TE.map(() => [
         {

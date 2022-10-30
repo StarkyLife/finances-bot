@@ -1,0 +1,16 @@
+version: "3.3"
+services:
+  mockserver:
+    image: mockserver/mockserver
+    ports:
+      - 1080:1080
+
+  finances-bot:
+    build: .
+    command: yarn test:e2e
+    ports:
+      - "8080:8080"
+    environment:
+      - WILDBERRIES_URL=http://mockserver:1080
+    depends_on:
+      - mockserver
