@@ -252,10 +252,11 @@ export const botController = {
                       `*Цена* - ${order.price}`,
                     ].join('\n'),
                     actions: [
-                      {
-                        text: 'Взять в работу',
-                        data: order.id,
-                      },
+                      // TODO: API у WB изменилось. Смотри что делать в devices/wildberries.int-test
+                      // {
+                      //   text: 'Взять в работу',
+                      //   data: order.id,
+                      // },
                     ],
                   })),
                 ),

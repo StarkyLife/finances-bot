@@ -1,3 +1,4 @@
+import axios from 'axios';
 import * as A from 'fp-ts/Array';
 import * as E from 'fp-ts/Either';
 import { constUndefined, flow, pipe } from 'fp-ts/function';
@@ -64,5 +65,21 @@ describe.skip('wildberries', () => {
     const result = await checkOrderStatusChanged();
 
     expect(E.toUnion(result)).toBeUndefined();
+  });
+
+  // TODO: добавить в device и изменение статуса отдельно не делать
+  // связывание с поставкой само изменит статус
+  // еще нужен метод создания поставки
+  it('should link order to supply', async () => {
+    const supplyId = 'WB-GI-22288578';
+    const data = {
+      orders: ['573598192'],
+    };
+
+    const response = await axios.put(`${wildberriesUrl}/supplies/${supplyId}`, data, {
+      headers: { Authorization: wildberriesToken },
+    });
+
+    expect(response.status).toEqual(200);
   });
 });
