@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { formatRFC3339, startOfToday } from 'date-fns';
 import * as A from 'fp-ts/Array';
 import * as E from 'fp-ts/Either';
-import { pipe } from 'fp-ts/lib/function';
+import { constUndefined, pipe } from 'fp-ts/lib/function';
 import * as TE from 'fp-ts/TaskEither';
 
 import {
@@ -13,6 +12,7 @@ import { WildberriesOrdersResponse } from './data/wildberries-orders-response';
 
 type WildberriesSDK = {
   getOrders: GetOrdersFromWildberries;
+  // TODO: remove feature
   changeWBOrderStatus: ChangeWBOrderStatus;
 };
 
@@ -20,14 +20,10 @@ export const connectToWildberries = (apiUrl: string, token: string): Wildberries
   return {
     getOrders: () =>
       pipe(
-        new URLSearchParams({
-          date_start: formatRFC3339(startOfToday()),
-          take: '100',
-          skip: '0',
-        }).toString(),
+        constUndefined(),
         TE.tryCatchK(
-          (params) =>
-            axios.get<WildberriesOrdersResponse>(`${apiUrl}/orders?${params}`, {
+          () =>
+            axios.get<WildberriesOrdersResponse>(`${apiUrl}/orders/new`, {
               headers: { Authorization: token },
             }),
           E.toError,
@@ -35,12 +31,12 @@ export const connectToWildberries = (apiUrl: string, token: string): Wildberries
         TE.map((response) => response.data.orders),
         TE.map(
           A.map((o) => ({
-            id: o.orderId,
-            dateCreated: o.dateCreated,
-            officeAddress: o.officeAddress,
+            id: o.id,
+            dateCreated: o.createdAt,
+            officeAddress: Object.values(o.address).filter(Boolean).join(', '),
             currency: 'RUB',
             price: o.convertedPrice,
-            status: o.status,
+            article: o.article,
           })),
         ),
       ),

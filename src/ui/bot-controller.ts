@@ -221,7 +221,9 @@ export const botController = {
       TE.fromIOEither,
       handleError,
     ),
-  checkWBNotifications: () =>
+  checkWBNotifications: (): T.Task<
+    Array<{ chatId: string; markdownText: string; actions: Array<{ text: string; data: string }> }>
+  > =>
     pipe(
       userGateway.getAllUsers(),
       A.map((user) =>
@@ -250,14 +252,9 @@ export const botController = {
                       `*Дата создания* - ${order.dateCreated}`,
                       `*Пункт назначения* - ${order.officeAddress}`,
                       `*Цена* - ${order.price}`,
+                      `*Артикул* - ${order.article}`,
                     ].join('\n'),
-                    actions: [
-                      // TODO: API у WB изменилось. Смотри что делать в devices/wildberries.int-test
-                      // {
-                      //   text: 'Взять в работу',
-                      //   data: order.id,
-                      // },
-                    ],
+                    actions: [],
                   })),
                 ),
                 TE.fold(

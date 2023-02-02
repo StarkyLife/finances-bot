@@ -37,6 +37,7 @@ export const presentNewOrdersUsecase = (
           ),
           officeAddress: o.officeAddress,
           price: `${o.price / 100} ${o.currency}`,
+          article: o.article,
         }),
       ),
     ),
