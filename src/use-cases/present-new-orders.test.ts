@@ -1,6 +1,6 @@
 import * as TE from 'fp-ts/TaskEither';
 
-import { OrderStatus, WBOrder } from '../core/data/orders';
+import { WBOrder } from '../core/data/orders';
 import { presentNewOrdersUsecase } from './present-new-orders';
 
 const createWBOrder = (order: Partial<WBOrder>): WBOrder => ({
@@ -9,7 +9,7 @@ const createWBOrder = (order: Partial<WBOrder>): WBOrder => ({
   officeAddress: 'г Москва (Россия), Большой Казенный переулок, д. 10с2',
   currency: 'RUB',
   price: 135355,
-  status: OrderStatus.NEW,
+  article: 'one-ring-7548',
   ...order,
 });
 
@@ -31,6 +31,7 @@ it('should present only unknown new orders', async () => {
       dateCreated: '17.09.2022 10:00',
       officeAddress: 'г Москва (Россия), Большой Казенный переулок, д. 10с2',
       price: '1353.55 RUB',
+      article: 'one-ring-7548',
     },
   ]);
 });
