@@ -33,7 +33,9 @@ export const connectToWildberries = (apiUrl: string, token: string): Wildberries
           A.map((o) => ({
             id: o.id,
             dateCreated: o.createdAt,
-            officeAddress: Object.values(o.address).filter(Boolean).join(', '),
+            officeAddress: o.address
+              ? Object.values(o.address).filter(Boolean).join(', ')
+              : '',
             currency: 'RUB',
             price: o.convertedPrice,
             article: o.article,
